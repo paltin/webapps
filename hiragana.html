@@ -2,86 +2,46 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Практика хираганы — пошаговый ввод</title>
-  <style>
-    :root{ --bg:#0b0e14; --card:#111623; --muted:#9aa4b2; --ink:#e6e6e6; --accent:#7aa2ff; --ok:#2a2f3a; --bad:#4e1f1f; --bad2:#7a2a2a; --kanaSize:50px; }
-    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif; background: var(--bg); color: var(--ink); }
-    .wrap { max-width: 960px; margin: 0 auto; padding: 24px; }
-    .card { position:relative; background: var(--card); border-radius: 16px; padding: 20px; box-shadow: 0 8px 28px rgba(0,0,0,0.35); }
-
-    .rows { display:flex; flex-direction:column; gap:10px; }
-    .row { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
-    .kana { font-size: var(--kanaSize); line-height:1; padding: 8px 12px; border-radius: 12px; background: #0f1424; transition: 0.2s; }
-    .kana.current { outline: none; box-shadow: 0 0 0 3px var(--accent), 0 0 12px rgba(122,162,255,.5); background: #0e1a33; }
-    .kana.done { background: var(--ok); outline: 2px solid transparent; opacity: .85; }
-
-    @keyframes blinkBad { 0%,100%{ background: var(--bad); } 50%{ background: var(--bad2); } }
-    .kana.blink { animation: blinkBad .25s ease-in-out 2; }
-
-    .controls { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top: 14px; }
-    input[type="text"] { width:min(680px,100%); padding:12px 14px; border-radius:12px; border:1px solid #243148; background:#0c1322; color:var(--ink); font-size:16px; }
-
-    /* Floating action buttons */
-    .fab { position:fixed; background:#1c2742; border:0; color:#fff; border-radius:999px; padding:14px 18px; cursor:pointer; font-weight:800; box-shadow:0 8px 24px rgba(0,0,0,.35); z-index:40; }
-    .settings-btn { left:16px; bottom:16px; }
-    .regen-btn { right:16px; bottom:16px; }
-
-    .home-button {
-      position:fixed;
-      top:16px;
-      right:16px;
-      padding:10px 18px;
-      border-radius:999px;
-      background:#2563eb;
-      color:#f9fafb;
-      text-decoration:none;
-      font-weight:600;
-      letter-spacing:0.3px;
-      box-shadow:0 10px 20px rgba(0,0,0,0.35);
-      transition:background-color .2s ease, transform .2s ease;
-      z-index:60;
-    }
-
-    .home-button:hover {
-      background:#1d4ed8;
-      transform:translateY(-1px);
-    }
-
-    /* Settings panel as bottom sheet */
-    .backdrop { position:fixed; inset:0; background:rgba(0,0,0,.6); opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:49; }
-    .backdrop.show { opacity:1; pointer-events:auto; }
-    .panel { position:fixed; left:0; right:0; bottom:0; width:100%; max-height:80vh; background:rgba(13,19,34,0.95); color:var(--ink); box-shadow:0 -8px 28px rgba(0,0,0,.45); transform:translateY(100%); transition:transform .25s ease; z-index:50; display:flex; flex-direction:column; border-top-left-radius:16px; border-top-right-radius:16px; }
-    .panel.open { transform:translateY(0); }
-    .panel header { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid #243148; }
-    .panel .content { padding:16px; display:flex; flex-direction:column; gap:14px; overflow:auto; }
-    .field { display:flex; align-items:center; justify-content:flex-start; gap:12px; }
-    .field input[type="number"], .field input[type="range"]{ width: 200px; }
-    .num { width:90px; padding:8px 10px; border-radius:10px; border:1px solid #243148; background:#0c1322; color:var(--ink); }
-    .switch { display:flex; align-items:center; gap:10px; }
-    .panel .actions { margin-top:auto; padding:16px; border-top:1px solid #243148; display:flex; gap:10px; }
-    .btn { padding:10px 14px; border-radius:10px; border:1px solid #243148; background:#1c2742; color:#fff; cursor:pointer; font-weight:700; }
-    .btn.ghost { background:transparent; }
-  </style>
+  <title>Практика хираганы — слоговые тренажёры</title>
+  <link rel="stylesheet" href="./css/hiragana.css">
 </head>
 <body>
-  <a class="home-button" href="index.html">Back</a>
+  <a class="home-button" href="index.html">Назад</a>
   <div class="wrap">
     <div class="card">
       <div id="rows" class="rows" aria-live="polite"></div>
       <div class="controls">
-        <input id="answer" type="text" placeholder="Введи чтение текущего слога…" />
+        <input id="answer" type="text" autocomplete="off" spellcheck="false" placeholder="Введите ромадзи" />
       </div>
     </div>
   </div>
 
-  <button id="openSettings" class="fab settings-btn" title="Настройки">⚙️</button>
-  <button id="regenBtn" class="fab regen-btn" title="Сгенерировать заново">↻</button>
+  <button id="openAlphabet" class="fab alphabet-btn" title="Выбор слогов">あ+</button>
+  <button id="openSettings" class="fab settings-btn" title="Настройки">⚙</button>
+  <button id="regenBtn" class="fab regen-btn" title="Новый набор">↻</button>
 
-  <!-- Settings bottom panel -->
+  <aside id="alphabetPanel" class="panel alphabet-panel" aria-hidden="true">
+    <header>
+      <strong>Выбор слогов для тренировки</strong>
+      <button id="closeAlphabet" class="btn ghost" type="button">Закрыть</button>
+    </header>
+    <div class="content">
+      <div class="select-toolbar">
+        <button id="selectAllBtn" class="btn ghost" type="button">Выбрать все</button>
+        <button id="deselectAllBtn" class="btn ghost" type="button">Снять все</button>
+        <button id="resetAlphabet" class="btn ghost" type="button">По умолчанию</button>
+      </div>
+      <div id="hiraganaGrid" class="kana-grid"></div>
+    </div>
+    <div class="actions">
+      <button id="applyAlphabet" class="btn" type="button">Применить выбранные</button>
+    </div>
+  </aside>
+
   <aside id="panel" class="panel" aria-hidden="true">
     <header>
       <strong>Настройки тренировки</strong>
-      <button id="closeSettings" class="btn ghost">✖</button>
+      <button id="closeSettings" class="btn ghost" type="button">Закрыть</button>
     </header>
     <div class="content">
       <div class="field">
@@ -89,217 +49,529 @@
         <input id="rowsCount" class="num" type="number" min="1" max="10" value="1">
       </div>
       <div class="field">
-        <label for="lenPerRow">Знаков в строке</label>
+        <label for="lenPerRow">Символов в строке</label>
         <input id="lenPerRow" class="num" type="number" min="1" max="20" value="7">
       </div>
       <div class="field">
-        <label for="kanaSize">Размер иероглифов</label>
+        <label for="kanaSize">Размер символов</label>
         <input id="kanaSize" type="range" min="24" max="120" value="50">
-      </div>
-      <div class="switch">
-        <input id="useDakuten" type="checkbox">
-        <label for="useDakuten">Использовать дакутэн/полу-дакутэн (が ぎ … ／ ぱ ぴ …)</label>
-      </div>
-      <div class="switch">
-        <input id="useYo" type="checkbox">
-        <label for="useYo">Использовать йо-ряды (きゃ・きゅ・きょ и т. п.)</label>
       </div>
     </div>
     <div class="actions">
-      <button id="applySettings" class="btn">Применить</button>
-      <button id="resetSettings" class="btn ghost">Сброс</button>
+      <button id="applySettings" class="btn" type="button">Применить</button>
+      <button id="resetSettings" class="btn ghost" type="button">Сбросить</button>
     </div>
   </aside>
 
-  <!-- Click-outside backdrop -->
   <div id="backdrop" class="backdrop" aria-hidden="true"></div>
 
   <script>
-    // --- БАЗОВЫЕ НАБОРЫ ---
-    var HIRA_BASE = [
-      ['あ','a'],['い','i'],['う','u'],['え','e'],['お','o'],
-      ['か','ka'],['き','ki'],['く','ku'],['け','ke'],['こ','ko'],
-      ['さ','sa'],['し','shi'],['す','su'],['せ','se'],['そ','so'],
-      ['た','ta'],['ち','chi'],['つ','tsu'],['て','te'],['と','to'],
-      ['な','na'],['に','ni'],['ぬ','nu'],['ね','ne'],['の','no'],
-      ['は','ha'],['ひ','hi'],['ふ','fu'],['へ','he'],['ほ','ho'],
-      ['ま','ma'],['み','mi'],['む','mu'],['め','me'],['も','mo'],
-      ['や','ya'],['ゆ','yu'],['よ','yo'],
-      ['ら','ra'],['り','ri'],['る','ru'],['れ','re'],['ろ','ro'],
-      ['わ','wa'],['を','wo'],['ん','n']
-    ];
+    (function () {
+      const HIRAGANA_DATA = [
+        { symbol: 'あ', romaji: 'a', group: 'base' },
+        { symbol: 'い', romaji: 'i', group: 'base' },
+        { symbol: 'う', romaji: 'u', group: 'base' },
+        { symbol: 'え', romaji: 'e', group: 'base' },
+        { symbol: 'お', romaji: 'o', group: 'base' },
+        { symbol: 'か', romaji: 'ka', group: 'base' },
+        { symbol: 'き', romaji: 'ki', group: 'base' },
+        { symbol: 'く', romaji: 'ku', group: 'base' },
+        { symbol: 'け', romaji: 'ke', group: 'base' },
+        { symbol: 'こ', romaji: 'ko', group: 'base' },
+        { symbol: 'さ', romaji: 'sa', group: 'base' },
+        { symbol: 'し', romaji: 'shi', group: 'base' },
+        { symbol: 'す', romaji: 'su', group: 'base' },
+        { symbol: 'せ', romaji: 'se', group: 'base' },
+        { symbol: 'そ', romaji: 'so', group: 'base' },
+        { symbol: 'た', romaji: 'ta', group: 'base' },
+        { symbol: 'ち', romaji: 'chi', group: 'base' },
+        { symbol: 'つ', romaji: 'tsu', group: 'base' },
+        { symbol: 'て', romaji: 'te', group: 'base' },
+        { symbol: 'と', romaji: 'to', group: 'base' },
+        { symbol: 'な', romaji: 'na', group: 'base' },
+        { symbol: 'に', romaji: 'ni', group: 'base' },
+        { symbol: 'ぬ', romaji: 'nu', group: 'base' },
+        { symbol: 'ね', romaji: 'ne', group: 'base' },
+        { symbol: 'の', romaji: 'no', group: 'base' },
+        { symbol: 'は', romaji: 'ha', group: 'base' },
+        { symbol: 'ひ', romaji: 'hi', group: 'base' },
+        { symbol: 'ふ', romaji: 'fu', group: 'base' },
+        { symbol: 'へ', romaji: 'he', group: 'base' },
+        { symbol: 'ほ', romaji: 'ho', group: 'base' },
+        { symbol: 'ま', romaji: 'ma', group: 'base' },
+        { symbol: 'み', romaji: 'mi', group: 'base' },
+        { symbol: 'む', romaji: 'mu', group: 'base' },
+        { symbol: 'め', romaji: 'me', group: 'base' },
+        { symbol: 'も', romaji: 'mo', group: 'base' },
+        { symbol: 'や', romaji: 'ya', group: 'base' },
+        { symbol: 'ゆ', romaji: 'yu', group: 'base' },
+        { symbol: 'よ', romaji: 'yo', group: 'base' },
+        { symbol: 'ら', romaji: 'ra', group: 'base' },
+        { symbol: 'り', romaji: 'ri', group: 'base' },
+        { symbol: 'る', romaji: 'ru', group: 'base' },
+        { symbol: 'れ', romaji: 're', group: 'base' },
+        { symbol: 'ろ', romaji: 'ro', group: 'base' },
+        { symbol: 'わ', romaji: 'wa', group: 'base' },
+        { symbol: 'を', romaji: 'wo', group: 'base' },
+        { symbol: 'ん', romaji: 'n', group: 'base' },
+        { symbol: 'が', romaji: 'ga', group: 'dakuten' },
+        { symbol: 'ぎ', romaji: 'gi', group: 'dakuten' },
+        { symbol: 'ぐ', romaji: 'gu', group: 'dakuten' },
+        { symbol: 'げ', romaji: 'ge', group: 'dakuten' },
+        { symbol: 'ご', romaji: 'go', group: 'dakuten' },
+        { symbol: 'ざ', romaji: 'za', group: 'dakuten' },
+        { symbol: 'じ', romaji: 'ji', group: 'dakuten' },
+        { symbol: 'ず', romaji: 'zu', group: 'dakuten' },
+        { symbol: 'ぜ', romaji: 'ze', group: 'dakuten' },
+        { symbol: 'ぞ', romaji: 'zo', group: 'dakuten' },
+        { symbol: 'だ', romaji: 'da', group: 'dakuten' },
+        { symbol: 'ぢ', romaji: 'ji', group: 'dakuten' },
+        { symbol: 'づ', romaji: 'zu', group: 'dakuten' },
+        { symbol: 'で', romaji: 'de', group: 'dakuten' },
+        { symbol: 'ど', romaji: 'do', group: 'dakuten' },
+        { symbol: 'ば', romaji: 'ba', group: 'dakuten' },
+        { symbol: 'び', romaji: 'bi', group: 'dakuten' },
+        { symbol: 'ぶ', romaji: 'bu', group: 'dakuten' },
+        { symbol: 'べ', romaji: 'be', group: 'dakuten' },
+        { symbol: 'ぼ', romaji: 'bo', group: 'dakuten' },
+        { symbol: 'ぱ', romaji: 'pa', group: 'dakuten' },
+        { symbol: 'ぴ', romaji: 'pi', group: 'dakuten' },
+        { symbol: 'ぷ', romaji: 'pu', group: 'dakuten' },
+        { symbol: 'ぺ', romaji: 'pe', group: 'dakuten' },
+        { symbol: 'ぽ', romaji: 'po', group: 'dakuten' },
+        { symbol: 'きゃ', romaji: 'kya', group: 'yoon' },
+        { symbol: 'きゅ', romaji: 'kyu', group: 'yoon' },
+        { symbol: 'きょ', romaji: 'kyo', group: 'yoon' },
+        { symbol: 'ぎゃ', romaji: 'gya', group: 'yoon' },
+        { symbol: 'ぎゅ', romaji: 'gyu', group: 'yoon' },
+        { symbol: 'ぎょ', romaji: 'gyo', group: 'yoon' },
+        { symbol: 'しゃ', romaji: 'sha', group: 'yoon' },
+        { symbol: 'しゅ', romaji: 'shu', group: 'yoon' },
+        { symbol: 'しょ', romaji: 'sho', group: 'yoon' },
+        { symbol: 'じゃ', romaji: 'ja', group: 'yoon' },
+        { symbol: 'じゅ', romaji: 'ju', group: 'yoon' },
+        { symbol: 'じょ', romaji: 'jo', group: 'yoon' },
+        { symbol: 'ちゃ', romaji: 'cha', group: 'yoon' },
+        { symbol: 'ちゅ', romaji: 'chu', group: 'yoon' },
+        { symbol: 'ちょ', romaji: 'cho', group: 'yoon' },
+        { symbol: 'にゃ', romaji: 'nya', group: 'yoon' },
+        { symbol: 'にゅ', romaji: 'nyu', group: 'yoon' },
+        { symbol: 'にょ', romaji: 'nyo', group: 'yoon' },
+        { symbol: 'ひゃ', romaji: 'hya', group: 'yoon' },
+        { symbol: 'ひゅ', romaji: 'hyu', group: 'yoon' },
+        { symbol: 'ひょ', romaji: 'hyo', group: 'yoon' },
+        { symbol: 'びゃ', romaji: 'bya', group: 'yoon' },
+        { symbol: 'びゅ', romaji: 'byu', group: 'yoon' },
+        { symbol: 'びょ', romaji: 'byo', group: 'yoon' },
+        { symbol: 'ぴゃ', romaji: 'pya', group: 'yoon' },
+        { symbol: 'ぴゅ', romaji: 'pyu', group: 'yoon' },
+        { symbol: 'ぴょ', romaji: 'pyo', group: 'yoon' },
+        { symbol: 'みゃ', romaji: 'mya', group: 'yoon' },
+        { symbol: 'みゅ', romaji: 'myu', group: 'yoon' },
+        { symbol: 'みょ', romaji: 'myo', group: 'yoon' },
+        { symbol: 'りゃ', romaji: 'rya', group: 'yoon' },
+        { symbol: 'りゅ', romaji: 'ryu', group: 'yoon' },
+        { symbol: 'りょ', romaji: 'ryo', group: 'yoon' }
+      ];
 
-    // --- ЭЛЕМЕНТЫ ---
-    var rowsWrap = document.getElementById('rows');
-    var answerEl = document.getElementById('answer');
-    var regenBtn = document.getElementById('regenBtn');
-    var panel = document.getElementById('panel');
-    var openSettings = document.getElementById('openSettings');
-    var closeSettings = document.getElementById('closeSettings');
-    var backdrop = document.getElementById('backdrop');
+      const GRID_LAYOUT = [
+        ['あ', 'い', 'う', 'え', 'お'],
+        ['か', 'き', 'く', 'け', 'こ'],
+        ['が', 'ぎ', 'ぐ', 'げ', 'ご'],
+        ['さ', 'し', 'す', 'せ', 'そ'],
+        ['ざ', 'じ', 'ず', 'ぜ', 'ぞ'],
+        ['た', 'ち', 'つ', 'て', 'と'],
+        ['だ', 'ぢ', 'づ', 'で', 'ど'],
+        ['な', 'に', 'ぬ', 'ね', 'の'],
+        ['は', 'ひ', 'ふ', 'へ', 'ほ'],
+        ['ば', 'び', 'ぶ', 'べ', 'ぼ'],
+        ['ぱ', 'ぴ', 'ぷ', 'ぺ', 'ぽ'],
+        ['ま', 'み', 'む', 'め', 'も'],
+        ['や', 'ゆ', 'よ', null, null],
+        ['ら', 'り', 'る', 'れ', 'ろ'],
+        ['わ', 'を', 'ん', null, null],
+        ['きゃ', 'きゅ', 'きょ', null, null],
+        ['ぎゃ', 'ぎゅ', 'ぎょ', null, null],
+        ['しゃ', 'しゅ', 'しょ', null, null],
+        ['じゃ', 'じゅ', 'じょ', null, null],
+        ['ちゃ', 'ちゅ', 'ちょ', null, null],
+        ['にゃ', 'にゅ', 'にょ', null, null],
+        ['ひゃ', 'ひゅ', 'ひょ', null, null],
+        ['びゃ', 'びゅ', 'びょ', null, null],
+        ['ぴゃ', 'ぴゅ', 'ぴょ', null, null],
+        ['みゃ', 'みゅ', 'みょ', null, null],
+        ['りゃ', 'りゅ', 'りょ', null, null]
+      ];
 
-    var rowsCountInput = document.getElementById('rowsCount');
-    var lenPerRowInput = document.getElementById('lenPerRow');
-    var kanaSizeInput = document.getElementById('kanaSize');
-    var applySettings = document.getElementById('applySettings');
-    var resetSettings = document.getElementById('resetSettings');
+      const BASE_SYMBOLS = new Set(HIRAGANA_DATA.filter(item => item.group === 'base').map(item => item.symbol));
+      const symbolToEntry = new Map(HIRAGANA_DATA.map(item => [item.symbol, item]));
 
-    function clamp(n,min,max){ n=parseInt(n,10); if(isNaN(n)) return min; return Math.max(min, Math.min(max, n)); }
+      const rowsWrap = document.getElementById('rows');
+      const answerEl = document.getElementById('answer');
+      const regenBtn = document.getElementById('regenBtn');
+      const alphabetPanel = document.getElementById('alphabetPanel');
+      const openAlphabet = document.getElementById('openAlphabet');
+      const closeAlphabet = document.getElementById('closeAlphabet');
+      const applyAlphabet = document.getElementById('applyAlphabet');
+      const selectAllBtn = document.getElementById('selectAllBtn');
+      const deselectAllBtn = document.getElementById('deselectAllBtn');
+      const resetAlphabet = document.getElementById('resetAlphabet');
+      const hiraganaGrid = document.getElementById('hiraganaGrid');
+      const panel = document.getElementById('panel');
+      const openSettings = document.getElementById('openSettings');
+      const closeSettings = document.getElementById('closeSettings');
+      const backdrop = document.getElementById('backdrop');
+      const rowsCountInput = document.getElementById('rowsCount');
+      const lenPerRowInput = document.getElementById('lenPerRow');
+      const kanaSizeInput = document.getElementById('kanaSize');
+      const applySettings = document.getElementById('applySettings');
+      const resetSettings = document.getElementById('resetSettings');
 
-    var rowsCount = clamp(rowsCountInput.value||1,1,10);
-    var lenPerRow = clamp(lenPerRowInput.value||7,1,20);
-    var kanaSize = clamp(kanaSizeInput.value||50,24,120);
-
-    // --- СОСТОЯНИЕ ---
-    var currentSeq = [];  // плоский массив пар [kana, romaji]
-    var breakpoints = []; // индексы концов строк в currentSeq
-    var currentIdx = 0;   // индекс текущего слога
-
-    function rnd(n){ return Math.floor(Math.random()*n); }
-    function applyKanaSize(px){ document.documentElement.style.setProperty('--kanaSize', px + 'px'); }
-
-    function newSet(){
-      currentSeq = []; breakpoints = [];
-      for(var r=0; r<rowsCount; r++){
-        var local = HIRA_BASE.slice();
-        var row = [];
-        while(row.length < lenPerRow && local.length>0){
-          var i = rnd(local.length);
-          row.push(local[i]);
-          local.splice(i,1); // уникальность в пределах строки
+      const clamp = (value, min, max) => {
+        const number = parseInt(value, 10);
+        if (Number.isNaN(number)) {
+          return min;
         }
-        for(var k=0;k<row.length;k++){ currentSeq.push(row[k]); }
-        breakpoints.push(currentSeq.length-1);
-      }
-      currentIdx = 0;
-      renderRows();
-      setCurrentVisual();
-      answerEl.value='';
-      answerEl.focus();
-    }
+        return Math.max(min, Math.min(max, number));
+      };
 
-    function renderRows(){
-      rowsWrap.innerHTML = '';
-      var start = 0;
-      for(var b=0;b<breakpoints.length;b++){
-        var end = breakpoints[b];
-        var rowDiv = document.createElement('div');
-        rowDiv.className = 'row';
-        for(var i=start;i<=end;i++){
-          var span = document.createElement('span');
-          span.className = 'kana';
-          span.dataset.idx = i;
-          span.textContent = currentSeq[i][0];
-          rowDiv.appendChild(span);
+      let rowsCount = clamp(rowsCountInput.value, 1, 10);
+      let lenPerRow = clamp(lenPerRowInput.value, 1, 20);
+      let kanaSize = clamp(kanaSizeInput.value, 24, 120);
+
+      let selectedKanas = new Set(BASE_SYMBOLS);
+      let currentSeq = [];
+      let breakpoints = [];
+      let currentIdx = 0;
+
+      function setKanaSize(px) {
+        document.documentElement.style.setProperty('--kanaSize', px + 'px');
+      }
+
+      function getActiveKanaList() {
+        const list = [];
+        selectedKanas.forEach((symbol) => {
+          const entry = symbolToEntry.get(symbol);
+          if (entry) {
+            list.push([entry.symbol, entry.romaji]);
+          }
+        });
+        return list;
+      }
+
+      function renderAlphabetGrid() {
+        hiraganaGrid.innerHTML = '';
+        GRID_LAYOUT.forEach((row) => {
+          row.forEach((symbol) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'grid-item';
+            if (!symbol) {
+              button.classList.add('empty');
+              hiraganaGrid.appendChild(button);
+              return;
+            }
+            const entry = symbolToEntry.get(symbol);
+            if (!entry) {
+              button.classList.add('empty');
+              hiraganaGrid.appendChild(button);
+              return;
+            }
+            button.dataset.kana = entry.symbol;
+            button.innerHTML = '<span class="kana">' + entry.symbol + '</span><span class="romaji">' + entry.romaji + '</span>';
+            if (selectedKanas.has(entry.symbol)) {
+              button.classList.add('selected');
+            }
+            button.addEventListener('click', () => {
+              if (selectedKanas.has(entry.symbol)) {
+                selectedKanas.delete(entry.symbol);
+              } else {
+                selectedKanas.add(entry.symbol);
+              }
+              button.classList.toggle('selected', selectedKanas.has(entry.symbol));
+            });
+            hiraganaGrid.appendChild(button);
+          });
+        });
+      }
+
+      function ensureSelection() {
+        if (!selectedKanas.size) {
+          selectedKanas = new Set(BASE_SYMBOLS);
         }
-        rowsWrap.appendChild(rowDiv);
-        start = end+1;
       }
-    }
 
-    function setCurrentVisual(){
-      var spans = document.querySelectorAll('.kana');
-      for(var i=0;i<spans.length;i++){ spans[i].classList.remove('current'); }
-      if(currentIdx < spans.length){ spans[currentIdx].classList.add('current'); }
-    }
+      function openAlphabetPanel() {
+        alphabetPanel.classList.add('open');
+        alphabetPanel.setAttribute('aria-hidden', 'false');
+        backdrop.classList.add('show');
+        backdrop.setAttribute('aria-hidden', 'false');
+      }
 
-    // --- НОРМАЛИЗАЦИЯ ВВОДА ---
-    var RU2RO = {
-      'а':'a','и':'i','у':'u','э':'e','е':'e','о':'o',
-      'ка':'ka','ки':'ki','ку':'ku','ке':'ke','ко':'ko',
-      'са':'sa','си':'shi','ши':'shi','су':'su','се':'se','со':'so',
-      'та':'ta','ти':'chi','чи':'chi','цу':'tsu','те':'te','то':'to',
-      'на':'na','ни':'ni','ну':'nu','не':'ne','но':'no',
-      'ха':'ha','хи':'hi','фу':'fu','ху':'fu','хе':'he','хо':'ho',
-      'ма':'ma','ми':'mi','му':'mu','ме':'me','мо':'mo',
-      'я':'ya','ю':'yu','йо':'yo','ё':'yo',
-      'ра':'ra','ри':'ri','ру':'ru','ре':'re','ро':'ro',
-      'ва':'wa','во':'wo','н':'n'
-    };
-    var RO_ALIASES = { 'si':'shi','ti':'chi','tu':'tsu','hu':'fu','zi':'ji' };
+      function closeAlphabetPanel() {
+        alphabetPanel.classList.remove('open');
+        alphabetPanel.setAttribute('aria-hidden', 'true');
+        if (!panel.classList.contains('open')) {
+          backdrop.classList.remove('show');
+          backdrop.setAttribute('aria-hidden', 'true');
+        }
+      }
 
-    function hasCyrillic(str){
-      for(var j=0;j<str.length;j++){ var code=str.charCodeAt(j); if(code>=1024 && code<=1327) return true; }
-      return false;
-    }
-    function normalizeToken(t){
-      var raw = (t||'').trim().toLowerCase();
-      if(!raw) return '';
-      if(hasCyrillic(raw)){ if(RU2RO.hasOwnProperty(raw)) return RU2RO[raw]; return raw; }
-      var out='';
-      for(var k=0;k<raw.length;k++){ var c=raw.charCodeAt(k); if((c>=97&&c<=122)||(c>=48&&c<=57)||c===45){ out+=raw[k]; } }
-      if(RO_ALIASES.hasOwnProperty(out)) out = RO_ALIASES[out];
-      return out;
-    }
-    function isVowelLat(ch){ return ch==='a'||ch==='e'||ch==='i'||ch==='o'||ch==='u'; }
-    function isVowelRu(ch){ return ch==='а'||ch==='е'||ch==='ё'||ch==='и'||ch==='о'||ch==='у'||ch==='ы'||ch==='э'||ch==='ю'||ch==='я'; }
-    function okMatch(expected, got){
-      return (got===expected) || (expected==='wo'&&(got==='o'||got==='wo')) || (expected==='n'&&(got==='n'||got==='m'));
-    }
+      function openSettingsPanel() {
+        panel.classList.add('open');
+        panel.setAttribute('aria-hidden', 'false');
+        backdrop.classList.add('show');
+        backdrop.setAttribute('aria-hidden', 'false');
+      }
 
-    function submitCurrent(){
-      if(currentIdx >= currentSeq.length) return;
-      var spans = document.querySelectorAll('.kana');
-      var tokenRaw = answerEl.value;
-      var got = normalizeToken(tokenRaw);
-      if(!got) return;
-      var expected = currentSeq[currentIdx][1];
-      var span = spans[currentIdx];
-      if(okMatch(expected, got)){
-        span.classList.remove('current');
-        span.classList.add('done');
-        answerEl.value='';
-        currentIdx++;
-        if(currentIdx >= currentSeq.length){ newSet(); return; }
+      function closeSettingsPanel() {
+        panel.classList.remove('open');
+        panel.setAttribute('aria-hidden', 'true');
+        if (!alphabetPanel.classList.contains('open')) {
+          backdrop.classList.remove('show');
+          backdrop.setAttribute('aria-hidden', 'true');
+        }
+      }
+
+      function newSet() {
+        const activeKanas = getActiveKanaList();
+        if (!activeKanas.length) {
+          rowsWrap.innerHTML = '<p class="info-message">Выберите хотя бы один слог в фильтре.</p>';
+          currentSeq = [];
+          breakpoints = [];
+          currentIdx = 0;
+          return;
+        }
+
+        currentSeq = [];
+        breakpoints = [];
+
+        for (let r = 0; r < rowsCount; r += 1) {
+          const pool = activeKanas.slice();
+          const row = [];
+          while (row.length < lenPerRow && pool.length > 0) {
+            const index = Math.floor(Math.random() * pool.length);
+            row.push(pool[index]);
+            pool.splice(index, 1);
+          }
+          if (row.length) {
+            Array.prototype.push.apply(currentSeq, row);
+            breakpoints.push(currentSeq.length - 1);
+          }
+        }
+
+        currentIdx = 0;
+        renderRows();
         setCurrentVisual();
-      } else {
-        span.classList.remove('blink'); void span.offsetWidth; span.classList.add('blink');
-        answerEl.select();
+        answerEl.value = '';
+        answerEl.focus();
       }
-    }
 
-    // Пробел/Enter — ручное подтверждение
-    answerEl.addEventListener('keydown', function(e){
-      var k = e.key||''; if(k===' '||k==='Spacebar'||k==='Enter'){ e.preventDefault(); submitCurrent(); }
-    });
+      function renderRows() {
+        rowsWrap.innerHTML = '';
+        let start = 0;
+        breakpoints.forEach((end) => {
+          const rowDiv = document.createElement('div');
+          rowDiv.className = 'row';
+          for (let i = start; i <= end; i += 1) {
+            const span = document.createElement('span');
+            span.className = 'kana';
+            span.dataset.idx = String(i);
+            span.textContent = currentSeq[i][0];
+            rowDiv.appendChild(span);
+          }
+          rowsWrap.appendChild(rowDiv);
+          start = end + 1;
+        });
+      }
 
-    // Автопроверка при вводе: первая гласная или длина >=2
-    answerEl.addEventListener('input', function(){
-      if(currentIdx >= currentSeq.length) return;
-      var v = (answerEl.value||'').toLowerCase(); if(!v) return;
-      var expected = currentSeq[currentIdx] ? currentSeq[currentIdx][1] : '';
-      var hasC = hasCyrillic(v);
-      var foundVowel = false;
-      if(hasC){ for(var i=0;i<v.length;i++){ if(isVowelRu(v[i])){ foundVowel = true; break; } } }
-      else { for(var j=0;j<v.length;j++){ if(isVowelLat(v[j])){ foundVowel = true; break; } } }
-      var norm = normalizeToken(v);
-      if(norm === expected){ submitCurrent(); return; }
-      if(foundVowel || norm.length >= expected.length){ submitCurrent(); }
-    });
+      function setCurrentVisual() {
+        const spans = rowsWrap.querySelectorAll('.kana');
+        spans.forEach((span) => span.classList.remove('current'));
+        if (spans[currentIdx]) {
+          spans[currentIdx].classList.add('current');
+        }
+      }
 
-    // --- Настройки ---
-    function openPanel(){ panel.classList.add('open'); panel.setAttribute('aria-hidden','false'); backdrop.classList.add('show'); backdrop.setAttribute('aria-hidden','false'); }
-    function closePanel(){ panel.classList.remove('open'); panel.setAttribute('aria-hidden','true'); backdrop.classList.remove('show'); backdrop.setAttribute('aria-hidden','true'); }
-    openSettings.addEventListener('click', openPanel);
-    closeSettings.addEventListener('click', closePanel);
-    backdrop.addEventListener('click', closePanel);
+      const CYRILLIC_VOWELS = new Set(['а', 'е', 'ё', 'и', 'о', 'у', 'ы', 'э', 'ю', 'я']);
+      const ROMAJI_ALIASES = { si: 'shi', ti: 'chi', tu: 'tsu', hu: 'fu', zi: 'ji', di: 'ji', du: 'zu', syu: 'shu', sya: 'sha', syo: 'sho', tyu: 'chu', tya: 'cha', tyo: 'cho' };
+      const RU_TO_ROMAJI = {
+        'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo', 'ж': 'zh',
+        'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o',
+        'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'h', 'ц': 'ts',
+        'ч': 'ch', 'ш': 'sh', 'щ': 'shch', 'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya'
+      };
 
-    // Живое применение настроек
-    function applyCounts(){ rowsCount = clamp(rowsCountInput.value||1,1,10); lenPerRow = clamp(lenPerRowInput.value||7,1,20); newSet(); }
-    rowsCountInput.addEventListener('input', applyCounts);
-    lenPerRowInput.addEventListener('input', applyCounts);
-    kanaSizeInput.addEventListener('input', function(){ kanaSize = clamp(kanaSizeInput.value||50,24,120); applyKanaSize(kanaSize); });
+      const hasCyrillic = (value) => /[Ѐ-ӿ]/.test(value);
 
-    // Кнопки панели
-    applySettings.addEventListener('click', function(){ applyCounts(); applyKanaSize(kanaSize); closePanel(); });
-    resetSettings.addEventListener('click', function(){ rowsCountInput.value=1; lenPerRowInput.value=7; kanaSizeInput.value=50; applyCounts(); applyKanaSize(50); });
+      function normalizeToken(raw) {
+        const value = (raw || '').trim().toLowerCase();
+        if (!value) {
+          return '';
+        }
+        let normalized = value;
+        if (hasCyrillic(value)) {
+          normalized = '';
+          for (const ch of value) {
+            normalized += RU_TO_ROMAJI.hasOwnProperty(ch) ? RU_TO_ROMAJI[ch] : ch;
+          }
+        }
+        normalized = normalized.split('').filter((ch) => (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9') || ch === '-').join('');
+        if (ROMAJI_ALIASES.hasOwnProperty(normalized)) {
+          normalized = ROMAJI_ALIASES[normalized];
+        }
+        return normalized;
+      }
 
-    // Кнопка регенерации
-    regenBtn.addEventListener('click', newSet);
+      function isVowelLat(ch) {
+        return ch === 'a' || ch === 'e' || ch === 'i' || ch === 'o' || ch === 'u';
+      }
 
-    // Старт
-    applyKanaSize(kanaSize);
-    newSet();
+      function isVowelRu(ch) {
+        return CYRILLIC_VOWELS.has(ch);
+      }
+
+      function okMatch(expected, got) {
+        if (got === expected) {
+          return true;
+        }
+        if (expected === 'wo' && (got === 'wo' || got === 'o')) {
+          return true;
+        }
+        if (expected === 'n' && (got === 'n' || got === 'm')) {
+          return true;
+        }
+        return false;
+      }
+
+      function submitCurrent() {
+        if (currentIdx >= currentSeq.length) {
+          return;
+        }
+        const spans = rowsWrap.querySelectorAll('.kana');
+        const tokenRaw = answerEl.value;
+        const normalized = normalizeToken(tokenRaw);
+        if (!normalized) {
+          return;
+        }
+        const expected = currentSeq[currentIdx][1];
+        const span = spans[currentIdx];
+        if (okMatch(expected, normalized)) {
+          span.classList.remove('current');
+          span.classList.add('done');
+          answerEl.value = '';
+          currentIdx += 1;
+          if (currentIdx >= currentSeq.length) {
+            newSet();
+            return;
+          }
+          setCurrentVisual();
+        } else {
+          span.classList.remove('blink');
+          void span.offsetWidth;
+          span.classList.add('blink');
+          answerEl.select();
+        }
+      }
+
+      answerEl.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar') {
+          event.preventDefault();
+          submitCurrent();
+        }
+      });
+
+      answerEl.addEventListener('input', () => {
+        if (currentIdx >= currentSeq.length) {
+          return;
+        }
+        const rawValue = (answerEl.value || '').toLowerCase();
+        if (!rawValue) {
+          return;
+        }
+        const expected = currentSeq[currentIdx][1];
+        const hasC = hasCyrillic(rawValue);
+        let foundVowel = false;
+        if (hasC) {
+          for (const ch of rawValue) {
+            if (isVowelRu(ch)) {
+              foundVowel = true;
+              break;
+            }
+          }
+        } else {
+          for (const ch of rawValue) {
+            if (isVowelLat(ch)) {
+              foundVowel = true;
+              break;
+            }
+          }
+        }
+        const normalized = normalizeToken(rawValue);
+        if (normalized === expected) {
+          submitCurrent();
+          return;
+        }
+        if (foundVowel || normalized.length >= expected.length) {
+          submitCurrent();
+        }
+      });
+
+      openAlphabet.addEventListener('click', () => {
+        renderAlphabetGrid();
+        openAlphabetPanel();
+      });
+      closeAlphabet.addEventListener('click', closeAlphabetPanel);
+      applyAlphabet.addEventListener('click', () => {
+        ensureSelection();
+        newSet();
+        closeAlphabetPanel();
+      });
+      selectAllBtn.addEventListener('click', () => {
+        selectedKanas = new Set(HIRAGANA_DATA.map((item) => item.symbol));
+        renderAlphabetGrid();
+      });
+      deselectAllBtn.addEventListener('click', () => {
+        selectedKanas.clear();
+        renderAlphabetGrid();
+      });
+      resetAlphabet.addEventListener('click', () => {
+        selectedKanas = new Set(BASE_SYMBOLS);
+        renderAlphabetGrid();
+      });
+
+      openSettings.addEventListener('click', openSettingsPanel);
+      closeSettings.addEventListener('click', closeSettingsPanel);
+      applySettings.addEventListener('click', () => {
+        rowsCount = clamp(rowsCountInput.value, 1, 10);
+        lenPerRow = clamp(lenPerRowInput.value, 1, 20);
+        kanaSize = clamp(kanaSizeInput.value, 24, 120);
+        setKanaSize(kanaSize);
+        newSet();
+        closeSettingsPanel();
+      });
+      resetSettings.addEventListener('click', () => {
+        rowsCountInput.value = 1;
+        lenPerRowInput.value = 7;
+        kanaSizeInput.value = 50;
+        rowsCount = 1;
+        lenPerRow = 7;
+        kanaSize = 50;
+        setKanaSize(kanaSize);
+        newSet();
+      });
+      regenBtn.addEventListener('click', newSet);
+
+      backdrop.addEventListener('click', () => {
+        closeAlphabetPanel();
+        closeSettingsPanel();
+      });
+
+      setKanaSize(kanaSize);
+      renderAlphabetGrid();
+      newSet();
+      answerEl.focus();
+    })();
   </script>
 </body>
 </html>
