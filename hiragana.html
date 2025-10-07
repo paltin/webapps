@@ -1,65 +1,65 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Практика хираганы — слоговые тренажёры</title>
+  <title>ÐŸÑ€Ð°ÐºÑ‚Ð¸ÐºÐ° Ñ…Ð¸Ñ€Ð°Ð³Ð°Ð½Ñ‹ â€” ÑÐ»Ð¾Ð³Ð¾Ð²Ñ‹Ðµ Ñ‚Ñ€ÐµÐ½Ð°Ð¶Ñ‘Ñ€Ñ‹</title>
   <link rel="stylesheet" href="./css/hiragana.css">
 </head>
 <body>
-  <a class="home-button" href="index.html">Назад</a>
+  <a class="home-button" href="index.html">ÐÐ°Ð·Ð°Ð´</a>
   <div class="wrap">
     <div class="card">
       <div id="rows" class="rows" aria-live="polite"></div>
       <div class="controls">
-        <input id="answer" type="text" autocomplete="off" spellcheck="false" placeholder="Введите ромадзи" />
+        <input id="answer" type="text" autocomplete="off" spellcheck="false" placeholder="Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ Ñ€Ð¾Ð¼Ð°Ð´Ð·Ð¸" />
       </div>
     </div>
   </div>
 
-  <button id="openAlphabet" class="fab alphabet-btn" title="Выбор слогов">あ+</button>
-  <button id="openSettings" class="fab settings-btn" title="Настройки">⚙</button>
-  <button id="regenBtn" class="fab regen-btn" title="Новый набор">↻</button>
+  <button id="openAlphabet" class="fab alphabet-btn" title="Ð’Ñ‹Ð±Ð¾Ñ€ ÑÐ»Ð¾Ð³Ð¾Ð²">ã‚+</button>
+  <button id="openSettings" class="fab settings-btn" title="ÐÐ°ÑÑ‚Ñ€Ð¾Ð¹ÐºÐ¸">âš™</button>
+  <button id="regenBtn" class="fab regen-btn" title="ÐÐ¾Ð²Ñ‹Ð¹ Ð½Ð°Ð±Ð¾Ñ€">â†»</button>
 
   <aside id="alphabetPanel" class="panel alphabet-panel" aria-hidden="true">
     <header>
-      <strong>Выбор слогов для тренировки</strong>
-      <button id="closeAlphabet" class="btn ghost" type="button">Закрыть</button>
+      <strong>Ð’Ñ‹Ð±Ð¾Ñ€ ÑÐ»Ð¾Ð³Ð¾Ð² Ð´Ð»Ñ Ñ‚Ñ€ÐµÐ½Ð¸Ñ€Ð¾Ð²ÐºÐ¸</strong>
+      <button id="closeAlphabet" class="btn ghost" type="button">Ð—Ð°ÐºÑ€Ñ‹Ñ‚ÑŒ</button>
     </header>
     <div class="content">
       <div class="select-toolbar">
-        <button id="selectAllBtn" class="btn ghost" type="button">Выбрать все</button>
-        <button id="deselectAllBtn" class="btn ghost" type="button">Снять все</button>
-        <button id="resetAlphabet" class="btn ghost" type="button">По умолчанию</button>
+        <button id="selectAllBtn" class="btn ghost" type="button">Ð’Ñ‹Ð±Ñ€Ð°Ñ‚ÑŒ Ð²ÑÐµ</button>
+        <button id="deselectAllBtn" class="btn ghost" type="button">Ð¡Ð½ÑÑ‚ÑŒ Ð²ÑÐµ</button>
+        <button id="resetAlphabet" class="btn ghost" type="button">ÐŸÐ¾ ÑƒÐ¼Ð¾Ð»Ñ‡Ð°Ð½Ð¸ÑŽ</button>
       </div>
       <div id="hiraganaGrid" class="kana-grid"></div>
     </div>
     <div class="actions">
-      <button id="applyAlphabet" class="btn" type="button">Применить выбранные</button>
+      <button id="applyAlphabet" class="btn" type="button">ÐŸÑ€Ð¸Ð¼ÐµÐ½Ð¸Ñ‚ÑŒ Ð²Ñ‹Ð±Ñ€Ð°Ð½Ð½Ñ‹Ðµ</button>
     </div>
   </aside>
 
   <aside id="panel" class="panel" aria-hidden="true">
     <header>
-      <strong>Настройки тренировки</strong>
-      <button id="closeSettings" class="btn ghost" type="button">Закрыть</button>
+      <strong>ÐÐ°ÑÑ‚Ñ€Ð¾Ð¹ÐºÐ¸ Ñ‚Ñ€ÐµÐ½Ð¸Ñ€Ð¾Ð²ÐºÐ¸</strong>
+      <button id="closeSettings" class="btn ghost" type="button">Ð—Ð°ÐºÑ€Ñ‹Ñ‚ÑŒ</button>
     </header>
     <div class="content">
       <div class="field">
-        <label for="rowsCount">Количество строк</label>
+        <label for="rowsCount">ÐšÐ¾Ð»Ð¸Ñ‡ÐµÑÑ‚Ð²Ð¾ ÑÑ‚Ñ€Ð¾Ðº</label>
         <input id="rowsCount" class="num" type="number" min="1" max="10" value="1">
       </div>
       <div class="field">
-        <label for="lenPerRow">Символов в строке</label>
+        <label for="lenPerRow">Ð¡Ð¸Ð¼Ð²Ð¾Ð»Ð¾Ð² Ð² ÑÑ‚Ñ€Ð¾ÐºÐµ</label>
         <input id="lenPerRow" class="num" type="number" min="1" max="20" value="7">
       </div>
       <div class="field">
-        <label for="kanaSize">Размер символов</label>
+        <label for="kanaSize">Ð Ð°Ð·Ð¼ÐµÑ€ ÑÐ¸Ð¼Ð²Ð¾Ð»Ð¾Ð²</label>
         <input id="kanaSize" type="range" min="24" max="120" value="50">
       </div>
     </div>
     <div class="actions">
-      <button id="applySettings" class="btn" type="button">Применить</button>
-      <button id="resetSettings" class="btn ghost" type="button">Сбросить</button>
+      <button id="applySettings" class="btn" type="button">ÐŸÑ€Ð¸Ð¼ÐµÐ½Ð¸Ñ‚ÑŒ</button>
+      <button id="resetSettings" class="btn ghost" type="button">Ð¡Ð±Ñ€Ð¾ÑÐ¸Ñ‚ÑŒ</button>
     </div>
   </aside>
 
@@ -68,139 +68,139 @@
   <script>
     (function () {
       const HIRAGANA_DATA = [
-        { symbol: 'あ', romaji: 'a', group: 'base' },
-        { symbol: 'い', romaji: 'i', group: 'base' },
-        { symbol: 'う', romaji: 'u', group: 'base' },
-        { symbol: 'え', romaji: 'e', group: 'base' },
-        { symbol: 'お', romaji: 'o', group: 'base' },
-        { symbol: 'か', romaji: 'ka', group: 'base' },
-        { symbol: 'き', romaji: 'ki', group: 'base' },
-        { symbol: 'く', romaji: 'ku', group: 'base' },
-        { symbol: 'け', romaji: 'ke', group: 'base' },
-        { symbol: 'こ', romaji: 'ko', group: 'base' },
-        { symbol: 'さ', romaji: 'sa', group: 'base' },
-        { symbol: 'し', romaji: 'shi', group: 'base' },
-        { symbol: 'す', romaji: 'su', group: 'base' },
-        { symbol: 'せ', romaji: 'se', group: 'base' },
-        { symbol: 'そ', romaji: 'so', group: 'base' },
-        { symbol: 'た', romaji: 'ta', group: 'base' },
-        { symbol: 'ち', romaji: 'chi', group: 'base' },
-        { symbol: 'つ', romaji: 'tsu', group: 'base' },
-        { symbol: 'て', romaji: 'te', group: 'base' },
-        { symbol: 'と', romaji: 'to', group: 'base' },
-        { symbol: 'な', romaji: 'na', group: 'base' },
-        { symbol: 'に', romaji: 'ni', group: 'base' },
-        { symbol: 'ぬ', romaji: 'nu', group: 'base' },
-        { symbol: 'ね', romaji: 'ne', group: 'base' },
-        { symbol: 'の', romaji: 'no', group: 'base' },
-        { symbol: 'は', romaji: 'ha', group: 'base' },
-        { symbol: 'ひ', romaji: 'hi', group: 'base' },
-        { symbol: 'ふ', romaji: 'fu', group: 'base' },
-        { symbol: 'へ', romaji: 'he', group: 'base' },
-        { symbol: 'ほ', romaji: 'ho', group: 'base' },
-        { symbol: 'ま', romaji: 'ma', group: 'base' },
-        { symbol: 'み', romaji: 'mi', group: 'base' },
-        { symbol: 'む', romaji: 'mu', group: 'base' },
-        { symbol: 'め', romaji: 'me', group: 'base' },
-        { symbol: 'も', romaji: 'mo', group: 'base' },
-        { symbol: 'や', romaji: 'ya', group: 'base' },
-        { symbol: 'ゆ', romaji: 'yu', group: 'base' },
-        { symbol: 'よ', romaji: 'yo', group: 'base' },
-        { symbol: 'ら', romaji: 'ra', group: 'base' },
-        { symbol: 'り', romaji: 'ri', group: 'base' },
-        { symbol: 'る', romaji: 'ru', group: 'base' },
-        { symbol: 'れ', romaji: 're', group: 'base' },
-        { symbol: 'ろ', romaji: 'ro', group: 'base' },
-        { symbol: 'わ', romaji: 'wa', group: 'base' },
-        { symbol: 'を', romaji: 'wo', group: 'base' },
-        { symbol: 'ん', romaji: 'n', group: 'base' },
-        { symbol: 'が', romaji: 'ga', group: 'dakuten' },
-        { symbol: 'ぎ', romaji: 'gi', group: 'dakuten' },
-        { symbol: 'ぐ', romaji: 'gu', group: 'dakuten' },
-        { symbol: 'げ', romaji: 'ge', group: 'dakuten' },
-        { symbol: 'ご', romaji: 'go', group: 'dakuten' },
-        { symbol: 'ざ', romaji: 'za', group: 'dakuten' },
-        { symbol: 'じ', romaji: 'ji', group: 'dakuten' },
-        { symbol: 'ず', romaji: 'zu', group: 'dakuten' },
-        { symbol: 'ぜ', romaji: 'ze', group: 'dakuten' },
-        { symbol: 'ぞ', romaji: 'zo', group: 'dakuten' },
-        { symbol: 'だ', romaji: 'da', group: 'dakuten' },
-        { symbol: 'ぢ', romaji: 'ji', group: 'dakuten' },
-        { symbol: 'づ', romaji: 'zu', group: 'dakuten' },
-        { symbol: 'で', romaji: 'de', group: 'dakuten' },
-        { symbol: 'ど', romaji: 'do', group: 'dakuten' },
-        { symbol: 'ば', romaji: 'ba', group: 'dakuten' },
-        { symbol: 'び', romaji: 'bi', group: 'dakuten' },
-        { symbol: 'ぶ', romaji: 'bu', group: 'dakuten' },
-        { symbol: 'べ', romaji: 'be', group: 'dakuten' },
-        { symbol: 'ぼ', romaji: 'bo', group: 'dakuten' },
-        { symbol: 'ぱ', romaji: 'pa', group: 'dakuten' },
-        { symbol: 'ぴ', romaji: 'pi', group: 'dakuten' },
-        { symbol: 'ぷ', romaji: 'pu', group: 'dakuten' },
-        { symbol: 'ぺ', romaji: 'pe', group: 'dakuten' },
-        { symbol: 'ぽ', romaji: 'po', group: 'dakuten' },
-        { symbol: 'きゃ', romaji: 'kya', group: 'yoon' },
-        { symbol: 'きゅ', romaji: 'kyu', group: 'yoon' },
-        { symbol: 'きょ', romaji: 'kyo', group: 'yoon' },
-        { symbol: 'ぎゃ', romaji: 'gya', group: 'yoon' },
-        { symbol: 'ぎゅ', romaji: 'gyu', group: 'yoon' },
-        { symbol: 'ぎょ', romaji: 'gyo', group: 'yoon' },
-        { symbol: 'しゃ', romaji: 'sha', group: 'yoon' },
-        { symbol: 'しゅ', romaji: 'shu', group: 'yoon' },
-        { symbol: 'しょ', romaji: 'sho', group: 'yoon' },
-        { symbol: 'じゃ', romaji: 'ja', group: 'yoon' },
-        { symbol: 'じゅ', romaji: 'ju', group: 'yoon' },
-        { symbol: 'じょ', romaji: 'jo', group: 'yoon' },
-        { symbol: 'ちゃ', romaji: 'cha', group: 'yoon' },
-        { symbol: 'ちゅ', romaji: 'chu', group: 'yoon' },
-        { symbol: 'ちょ', romaji: 'cho', group: 'yoon' },
-        { symbol: 'にゃ', romaji: 'nya', group: 'yoon' },
-        { symbol: 'にゅ', romaji: 'nyu', group: 'yoon' },
-        { symbol: 'にょ', romaji: 'nyo', group: 'yoon' },
-        { symbol: 'ひゃ', romaji: 'hya', group: 'yoon' },
-        { symbol: 'ひゅ', romaji: 'hyu', group: 'yoon' },
-        { symbol: 'ひょ', romaji: 'hyo', group: 'yoon' },
-        { symbol: 'びゃ', romaji: 'bya', group: 'yoon' },
-        { symbol: 'びゅ', romaji: 'byu', group: 'yoon' },
-        { symbol: 'びょ', romaji: 'byo', group: 'yoon' },
-        { symbol: 'ぴゃ', romaji: 'pya', group: 'yoon' },
-        { symbol: 'ぴゅ', romaji: 'pyu', group: 'yoon' },
-        { symbol: 'ぴょ', romaji: 'pyo', group: 'yoon' },
-        { symbol: 'みゃ', romaji: 'mya', group: 'yoon' },
-        { symbol: 'みゅ', romaji: 'myu', group: 'yoon' },
-        { symbol: 'みょ', romaji: 'myo', group: 'yoon' },
-        { symbol: 'りゃ', romaji: 'rya', group: 'yoon' },
-        { symbol: 'りゅ', romaji: 'ryu', group: 'yoon' },
-        { symbol: 'りょ', romaji: 'ryo', group: 'yoon' }
+        { symbol: 'ã‚', romaji: 'a', group: 'base' },
+        { symbol: 'ã„', romaji: 'i', group: 'base' },
+        { symbol: 'ã†', romaji: 'u', group: 'base' },
+        { symbol: 'ãˆ', romaji: 'e', group: 'base' },
+        { symbol: 'ãŠ', romaji: 'o', group: 'base' },
+        { symbol: 'ã‹', romaji: 'ka', group: 'base' },
+        { symbol: 'ã', romaji: 'ki', group: 'base' },
+        { symbol: 'ã', romaji: 'ku', group: 'base' },
+        { symbol: 'ã‘', romaji: 'ke', group: 'base' },
+        { symbol: 'ã“', romaji: 'ko', group: 'base' },
+        { symbol: 'ã•', romaji: 'sa', group: 'base' },
+        { symbol: 'ã—', romaji: 'shi', group: 'base' },
+        { symbol: 'ã™', romaji: 'su', group: 'base' },
+        { symbol: 'ã›', romaji: 'se', group: 'base' },
+        { symbol: 'ã', romaji: 'so', group: 'base' },
+        { symbol: 'ãŸ', romaji: 'ta', group: 'base' },
+        { symbol: 'ã¡', romaji: 'chi', group: 'base' },
+        { symbol: 'ã¤', romaji: 'tsu', group: 'base' },
+        { symbol: 'ã¦', romaji: 'te', group: 'base' },
+        { symbol: 'ã¨', romaji: 'to', group: 'base' },
+        { symbol: 'ãª', romaji: 'na', group: 'base' },
+        { symbol: 'ã«', romaji: 'ni', group: 'base' },
+        { symbol: 'ã¬', romaji: 'nu', group: 'base' },
+        { symbol: 'ã­', romaji: 'ne', group: 'base' },
+        { symbol: 'ã®', romaji: 'no', group: 'base' },
+        { symbol: 'ã¯', romaji: 'ha', group: 'base' },
+        { symbol: 'ã²', romaji: 'hi', group: 'base' },
+        { symbol: 'ãµ', romaji: 'fu', group: 'base' },
+        { symbol: 'ã¸', romaji: 'he', group: 'base' },
+        { symbol: 'ã»', romaji: 'ho', group: 'base' },
+        { symbol: 'ã¾', romaji: 'ma', group: 'base' },
+        { symbol: 'ã¿', romaji: 'mi', group: 'base' },
+        { symbol: 'ã‚€', romaji: 'mu', group: 'base' },
+        { symbol: 'ã‚', romaji: 'me', group: 'base' },
+        { symbol: 'ã‚‚', romaji: 'mo', group: 'base' },
+        { symbol: 'ã‚„', romaji: 'ya', group: 'base' },
+        { symbol: 'ã‚†', romaji: 'yu', group: 'base' },
+        { symbol: 'ã‚ˆ', romaji: 'yo', group: 'base' },
+        { symbol: 'ã‚‰', romaji: 'ra', group: 'base' },
+        { symbol: 'ã‚Š', romaji: 'ri', group: 'base' },
+        { symbol: 'ã‚‹', romaji: 'ru', group: 'base' },
+        { symbol: 'ã‚Œ', romaji: 're', group: 'base' },
+        { symbol: 'ã‚', romaji: 'ro', group: 'base' },
+        { symbol: 'ã‚', romaji: 'wa', group: 'base' },
+        { symbol: 'ã‚’', romaji: 'wo', group: 'base' },
+        { symbol: 'ã‚“', romaji: 'n', group: 'base' },
+        { symbol: 'ãŒ', romaji: 'ga', group: 'dakuten' },
+        { symbol: 'ãŽ', romaji: 'gi', group: 'dakuten' },
+        { symbol: 'ã', romaji: 'gu', group: 'dakuten' },
+        { symbol: 'ã’', romaji: 'ge', group: 'dakuten' },
+        { symbol: 'ã”', romaji: 'go', group: 'dakuten' },
+        { symbol: 'ã–', romaji: 'za', group: 'dakuten' },
+        { symbol: 'ã˜', romaji: 'ji', group: 'dakuten' },
+        { symbol: 'ãš', romaji: 'zu', group: 'dakuten' },
+        { symbol: 'ãœ', romaji: 'ze', group: 'dakuten' },
+        { symbol: 'ãž', romaji: 'zo', group: 'dakuten' },
+        { symbol: 'ã ', romaji: 'da', group: 'dakuten' },
+        { symbol: 'ã¢', romaji: 'ji', group: 'dakuten' },
+        { symbol: 'ã¥', romaji: 'zu', group: 'dakuten' },
+        { symbol: 'ã§', romaji: 'de', group: 'dakuten' },
+        { symbol: 'ã©', romaji: 'do', group: 'dakuten' },
+        { symbol: 'ã°', romaji: 'ba', group: 'dakuten' },
+        { symbol: 'ã³', romaji: 'bi', group: 'dakuten' },
+        { symbol: 'ã¶', romaji: 'bu', group: 'dakuten' },
+        { symbol: 'ã¹', romaji: 'be', group: 'dakuten' },
+        { symbol: 'ã¼', romaji: 'bo', group: 'dakuten' },
+        { symbol: 'ã±', romaji: 'pa', group: 'dakuten' },
+        { symbol: 'ã´', romaji: 'pi', group: 'dakuten' },
+        { symbol: 'ã·', romaji: 'pu', group: 'dakuten' },
+        { symbol: 'ãº', romaji: 'pe', group: 'dakuten' },
+        { symbol: 'ã½', romaji: 'po', group: 'dakuten' },
+        { symbol: 'ãã‚ƒ', romaji: 'kya', group: 'yoon' },
+        { symbol: 'ãã‚…', romaji: 'kyu', group: 'yoon' },
+        { symbol: 'ãã‚‡', romaji: 'kyo', group: 'yoon' },
+        { symbol: 'ãŽã‚ƒ', romaji: 'gya', group: 'yoon' },
+        { symbol: 'ãŽã‚…', romaji: 'gyu', group: 'yoon' },
+        { symbol: 'ãŽã‚‡', romaji: 'gyo', group: 'yoon' },
+        { symbol: 'ã—ã‚ƒ', romaji: 'sha', group: 'yoon' },
+        { symbol: 'ã—ã‚…', romaji: 'shu', group: 'yoon' },
+        { symbol: 'ã—ã‚‡', romaji: 'sho', group: 'yoon' },
+        { symbol: 'ã˜ã‚ƒ', romaji: 'ja', group: 'yoon' },
+        { symbol: 'ã˜ã‚…', romaji: 'ju', group: 'yoon' },
+        { symbol: 'ã˜ã‚‡', romaji: 'jo', group: 'yoon' },
+        { symbol: 'ã¡ã‚ƒ', romaji: 'cha', group: 'yoon' },
+        { symbol: 'ã¡ã‚…', romaji: 'chu', group: 'yoon' },
+        { symbol: 'ã¡ã‚‡', romaji: 'cho', group: 'yoon' },
+        { symbol: 'ã«ã‚ƒ', romaji: 'nya', group: 'yoon' },
+        { symbol: 'ã«ã‚…', romaji: 'nyu', group: 'yoon' },
+        { symbol: 'ã«ã‚‡', romaji: 'nyo', group: 'yoon' },
+        { symbol: 'ã²ã‚ƒ', romaji: 'hya', group: 'yoon' },
+        { symbol: 'ã²ã‚…', romaji: 'hyu', group: 'yoon' },
+        { symbol: 'ã²ã‚‡', romaji: 'hyo', group: 'yoon' },
+        { symbol: 'ã³ã‚ƒ', romaji: 'bya', group: 'yoon' },
+        { symbol: 'ã³ã‚…', romaji: 'byu', group: 'yoon' },
+        { symbol: 'ã³ã‚‡', romaji: 'byo', group: 'yoon' },
+        { symbol: 'ã´ã‚ƒ', romaji: 'pya', group: 'yoon' },
+        { symbol: 'ã´ã‚…', romaji: 'pyu', group: 'yoon' },
+        { symbol: 'ã´ã‚‡', romaji: 'pyo', group: 'yoon' },
+        { symbol: 'ã¿ã‚ƒ', romaji: 'mya', group: 'yoon' },
+        { symbol: 'ã¿ã‚…', romaji: 'myu', group: 'yoon' },
+        { symbol: 'ã¿ã‚‡', romaji: 'myo', group: 'yoon' },
+        { symbol: 'ã‚Šã‚ƒ', romaji: 'rya', group: 'yoon' },
+        { symbol: 'ã‚Šã‚…', romaji: 'ryu', group: 'yoon' },
+        { symbol: 'ã‚Šã‚‡', romaji: 'ryo', group: 'yoon' }
       ];
 
       const GRID_LAYOUT = [
-        ['あ', 'い', 'う', 'え', 'お'],
-        ['か', 'き', 'く', 'け', 'こ'],
-        ['が', 'ぎ', 'ぐ', 'げ', 'ご'],
-        ['さ', 'し', 'す', 'せ', 'そ'],
-        ['ざ', 'じ', 'ず', 'ぜ', 'ぞ'],
-        ['た', 'ち', 'つ', 'て', 'と'],
-        ['だ', 'ぢ', 'づ', 'で', 'ど'],
-        ['な', 'に', 'ぬ', 'ね', 'の'],
-        ['は', 'ひ', 'ふ', 'へ', 'ほ'],
-        ['ば', 'び', 'ぶ', 'べ', 'ぼ'],
-        ['ぱ', 'ぴ', 'ぷ', 'ぺ', 'ぽ'],
-        ['ま', 'み', 'む', 'め', 'も'],
-        ['や', 'ゆ', 'よ', null, null],
-        ['ら', 'り', 'る', 'れ', 'ろ'],
-        ['わ', 'を', 'ん', null, null],
-        ['きゃ', 'きゅ', 'きょ', null, null],
-        ['ぎゃ', 'ぎゅ', 'ぎょ', null, null],
-        ['しゃ', 'しゅ', 'しょ', null, null],
-        ['じゃ', 'じゅ', 'じょ', null, null],
-        ['ちゃ', 'ちゅ', 'ちょ', null, null],
-        ['にゃ', 'にゅ', 'にょ', null, null],
-        ['ひゃ', 'ひゅ', 'ひょ', null, null],
-        ['びゃ', 'びゅ', 'びょ', null, null],
-        ['ぴゃ', 'ぴゅ', 'ぴょ', null, null],
-        ['みゃ', 'みゅ', 'みょ', null, null],
-        ['りゃ', 'りゅ', 'りょ', null, null]
+        ['ã‚', 'ã„', 'ã†', 'ãˆ', 'ãŠ'],
+        ['ã‹', 'ã', 'ã', 'ã‘', 'ã“'],
+        ['ãŒ', 'ãŽ', 'ã', 'ã’', 'ã”'],
+        ['ã•', 'ã—', 'ã™', 'ã›', 'ã'],
+        ['ã–', 'ã˜', 'ãš', 'ãœ', 'ãž'],
+        ['ãŸ', 'ã¡', 'ã¤', 'ã¦', 'ã¨'],
+        ['ã ', 'ã¢', 'ã¥', 'ã§', 'ã©'],
+        ['ãª', 'ã«', 'ã¬', 'ã­', 'ã®'],
+        ['ã¯', 'ã²', 'ãµ', 'ã¸', 'ã»'],
+        ['ã°', 'ã³', 'ã¶', 'ã¹', 'ã¼'],
+        ['ã±', 'ã´', 'ã·', 'ãº', 'ã½'],
+        ['ã¾', 'ã¿', 'ã‚€', 'ã‚', 'ã‚‚'],
+        ['ã‚„', 'ã‚†', 'ã‚ˆ', null, null],
+        ['ã‚‰', 'ã‚Š', 'ã‚‹', 'ã‚Œ', 'ã‚'],
+        ['ã‚', 'ã‚’', 'ã‚“', null, null],
+        ['ãã‚ƒ', 'ãã‚…', 'ãã‚‡', null, null],
+        ['ãŽã‚ƒ', 'ãŽã‚…', 'ãŽã‚‡', null, null],
+        ['ã—ã‚ƒ', 'ã—ã‚…', 'ã—ã‚‡', null, null],
+        ['ã˜ã‚ƒ', 'ã˜ã‚…', 'ã˜ã‚‡', null, null],
+        ['ã¡ã‚ƒ', 'ã¡ã‚…', 'ã¡ã‚‡', null, null],
+        ['ã«ã‚ƒ', 'ã«ã‚…', 'ã«ã‚‡', null, null],
+        ['ã²ã‚ƒ', 'ã²ã‚…', 'ã²ã‚‡', null, null],
+        ['ã³ã‚ƒ', 'ã³ã‚…', 'ã³ã‚‡', null, null],
+        ['ã´ã‚ƒ', 'ã´ã‚…', 'ã´ã‚‡', null, null],
+        ['ã¿ã‚ƒ', 'ã¿ã‚…', 'ã¿ã‚‡', null, null],
+        ['ã‚Šã‚ƒ', 'ã‚Šã‚…', 'ã‚Šã‚‡', null, null]
       ];
 
       const BASE_SYMBOLS = new Set(HIRAGANA_DATA.filter(item => item.group === 'base').map(item => item.symbol));
@@ -336,7 +336,7 @@
       function newSet() {
         const activeKanas = getActiveKanaList();
         if (!activeKanas.length) {
-          rowsWrap.innerHTML = '<p class="info-message">Выберите хотя бы один слог в фильтре.</p>';
+          rowsWrap.innerHTML = '<p class="info-message">Ð’Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ Ñ…Ð¾Ñ‚Ñ Ð±Ñ‹ Ð¾Ð´Ð¸Ð½ ÑÐ»Ð¾Ð³ Ð² Ñ„Ð¸Ð»ÑŒÑ‚Ñ€Ðµ.</p>';
           currentSeq = [];
           breakpoints = [];
           currentIdx = 0;
@@ -393,16 +393,16 @@
         }
       }
 
-      const CYRILLIC_VOWELS = new Set(['а', 'е', 'ё', 'и', 'о', 'у', 'ы', 'э', 'ю', 'я']);
+      const CYRILLIC_VOWELS = new Set(['Ð°', 'Ðµ', 'Ñ‘', 'Ð¸', 'Ð¾', 'Ñƒ', 'Ñ‹', 'Ñ', 'ÑŽ', 'Ñ']);
       const ROMAJI_ALIASES = { si: 'shi', ti: 'chi', tu: 'tsu', hu: 'fu', zi: 'ji', di: 'ji', du: 'zu', syu: 'shu', sya: 'sha', syo: 'sho', tyu: 'chu', tya: 'cha', tyo: 'cho' };
       const RU_TO_ROMAJI = {
-        'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo', 'ж': 'zh',
-        'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o',
-        'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'h', 'ц': 'ts',
-        'ч': 'ch', 'ш': 'sh', 'щ': 'shch', 'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya'
+        'Ð°': 'a', 'Ð±': 'b', 'Ð²': 'v', 'Ð³': 'g', 'Ð´': 'd', 'Ðµ': 'e', 'Ñ‘': 'yo', 'Ð¶': 'zh',
+        'Ð·': 'z', 'Ð¸': 'i', 'Ð¹': 'y', 'Ðº': 'k', 'Ð»': 'l', 'Ð¼': 'm', 'Ð½': 'n', 'Ð¾': 'o',
+        'Ð¿': 'p', 'Ñ€': 'r', 'Ñ': 's', 'Ñ‚': 't', 'Ñƒ': 'u', 'Ñ„': 'f', 'Ñ…': 'h', 'Ñ†': 'ts',
+        'Ñ‡': 'ch', 'Ñˆ': 'sh', 'Ñ‰': 'shch', 'ÑŠ': '', 'Ñ‹': 'y', 'ÑŒ': '', 'Ñ': 'e', 'ÑŽ': 'yu', 'Ñ': 'ya'
       };
 
-      const hasCyrillic = (value) => /[Ѐ-ӿ]/.test(value);
+      const hasCyrillic = (value) => /[Ð€-Ó¿]/.test(value);
 
       function normalizeToken(raw) {
         const value = (raw || '').trim().toLowerCase();
@@ -573,5 +573,7 @@
       answerEl.focus();
     })();
   </script>
-</body>
+  <script type="module" src="./js/filter-bridge.js"></script>`r`n</body>
 </html>
+
+
