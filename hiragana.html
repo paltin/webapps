@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Практика хираганы — пошаговый ввод</title>
+  <style>
+    :root{ --bg:#0b0e14; --card:#111623; --muted:#9aa4b2; --ink:#e6e6e6; --accent:#7aa2ff; --ok:#2a2f3a; --bad:#4e1f1f; --bad2:#7a2a2a; --kanaSize:50px; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif; background: var(--bg); color: var(--ink); }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 24px; }
+    .card { position:relative; background: var(--card); border-radius: 16px; padding: 20px; box-shadow: 0 8px 28px rgba(0,0,0,0.35); }
+
+    .rows { display:flex; flex-direction:column; gap:10px; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+    .kana { font-size: var(--kanaSize); line-height:1; padding: 8px 12px; border-radius: 12px; background: #0f1424; transition: 0.2s; }
+    .kana.current { outline: none; box-shadow: 0 0 0 3px var(--accent), 0 0 12px rgba(122,162,255,.5); background: #0e1a33; }
+    .kana.done { background: var(--ok); outline: 2px solid transparent; opacity: .85; }
+
+    @keyframes blinkBad { 0%,100%{ background: var(--bad); } 50%{ background: var(--bad2); } }
+    .kana.blink { animation: blinkBad .25s ease-in-out 2; }
+
+    .controls { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top: 14px; }
+    input[type="text"] { width:min(680px,100%); padding:12px 14px; border-radius:12px; border:1px solid #243148; background:#0c1322; color:var(--ink); font-size:16px; }
+
+    /* Floating action buttons */
+    .fab { position:fixed; background:#1c2742; border:0; color:#fff; border-radius:999px; padding:14px 18px; cursor:pointer; font-weight:800; box-shadow:0 8px 24px rgba(0,0,0,.35); z-index:40; }
+    .settings-btn { left:16px; bottom:16px; }
+    .regen-btn { right:16px; bottom:16px; }
+
+    .home-button {
+      position:fixed;
+      top:16px;
+      right:16px;
+      padding:10px 18px;
+      border-radius:999px;
+      background:#2563eb;
+      color:#f9fafb;
+      text-decoration:none;
+      font-weight:600;
+      letter-spacing:0.3px;
+      box-shadow:0 10px 20px rgba(0,0,0,0.35);
+      transition:background-color .2s ease, transform .2s ease;
+      z-index:60;
+    }
+
+    .home-button:hover {
+      background:#1d4ed8;
+      transform:translateY(-1px);
+    }
+
+    /* Settings panel as bottom sheet */
+    .backdrop { position:fixed; inset:0; background:rgba(0,0,0,.6); opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:49; }
+    .backdrop.show { opacity:1; pointer-events:auto; }
+    .panel { position:fixed; left:0; right:0; bottom:0; width:100%; max-height:80vh; background:rgba(13,19,34,0.95); color:var(--ink); box-shadow:0 -8px 28px rgba(0,0,0,.45); transform:translateY(100%); transition:transform .25s ease; z-index:50; display:flex; flex-direction:column; border-top-left-radius:16px; border-top-right-radius:16px; }
+    .panel.open { transform:translateY(0); }
+    .panel header { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid #243148; }
+    .panel .content { padding:16px; display:flex; flex-direction:column; gap:14px; overflow:auto; }
+    .field { display:flex; align-items:center; justify-content:flex-start; gap:12px; }
+    .field input[type="number"], .field input[type="range"]{ width: 200px; }
+    .num { width:90px; padding:8px 10px; border-radius:10px; border:1px solid #243148; background:#0c1322; color:var(--ink); }
+    .switch { display:flex; align-items:center; gap:10px; }
+    .panel .actions { margin-top:auto; padding:16px; border-top:1px solid #243148; display:flex; gap:10px; }
+    .btn { padding:10px 14px; border-radius:10px; border:1px solid #243148; background:#1c2742; color:#fff; cursor:pointer; font-weight:700; }
+    .btn.ghost { background:transparent; }
+  </style>
+</head>
+<body>
+  <a class="home-button" href="index.html">Back</a>
+  <div class="wrap">
+    <div class="card">
+      <div id="rows" class="rows" aria-live="polite"></div>
+      <div class="controls">
+        <input id="answer" type="text" placeholder="Введи чтение текущего слога…" />
+      </div>
+    </div>
+  </div>
+
+  <button id="openSettings" class="fab settings-btn" title="Настройки">⚙️</button>
+  <button id="regenBtn" class="fab regen-btn" title="Сгенерировать заново">↻</button>
+
+  <!-- Settings bottom panel -->
+  <aside id="panel" class="panel" aria-hidden="true">
+    <header>
+      <strong>Настройки тренировки</strong>
+      <button id="closeSettings" class="btn ghost">✖</button>
+    </header>
+    <div class="content">
+      <div class="field">
+        <label for="rowsCount">Количество строк</label>
+        <input id="rowsCount" class="num" type="number" min="1" max="10" value="1">
+      </div>
+      <div class="field">
+        <label for="lenPerRow">Знаков в строке</label>
+        <input id="lenPerRow" class="num" type="number" min="1" max="20" value="7">
+      </div>
+      <div class="field">
+        <label for="kanaSize">Размер иероглифов</label>
+        <input id="kanaSize" type="range" min="24" max="120" value="50">
+      </div>
+      <div class="switch">
+        <input id="useDakuten" type="checkbox">
+        <label for="useDakuten">Использовать дакутэн/полу-дакутэн (が ぎ … ／ ぱ ぴ …)</label>
+      </div>
+      <div class="switch">
+        <input id="useYo" type="checkbox">
+        <label for="useYo">Использовать йо-ряды (きゃ・きゅ・きょ и т. п.)</label>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="applySettings" class="btn">Применить</button>
+      <button id="resetSettings" class="btn ghost">Сброс</button>
+    </div>
+  </aside>
+
+  <!-- Click-outside backdrop -->
+  <div id="backdrop" class="backdrop" aria-hidden="true"></div>
+
+  <script>
+    // --- БАЗОВЫЕ НАБОРЫ ---
+    var HIRA_BASE = [
+      ['あ','a'],['い','i'],['う','u'],['え','e'],['お','o'],
+      ['か','ka'],['き','ki'],['く','ku'],['け','ke'],['こ','ko'],
+      ['さ','sa'],['し','shi'],['す','su'],['せ','se'],['そ','so'],
+      ['た','ta'],['ち','chi'],['つ','tsu'],['て','te'],['と','to'],
+      ['な','na'],['に','ni'],['ぬ','nu'],['ね','ne'],['の','no'],
+      ['は','ha'],['ひ','hi'],['ふ','fu'],['へ','he'],['ほ','ho'],
+      ['ま','ma'],['み','mi'],['む','mu'],['め','me'],['も','mo'],
+      ['や','ya'],['ゆ','yu'],['よ','yo'],
+      ['ら','ra'],['り','ri'],['る','ru'],['れ','re'],['ろ','ro'],
+      ['わ','wa'],['を','wo'],['ん','n']
+    ];
+
+    // --- ЭЛЕМЕНТЫ ---
+    var rowsWrap = document.getElementById('rows');
+    var answerEl = document.getElementById('answer');
+    var regenBtn = document.getElementById('regenBtn');
+    var panel = document.getElementById('panel');
+    var openSettings = document.getElementById('openSettings');
+    var closeSettings = document.getElementById('closeSettings');
+    var backdrop = document.getElementById('backdrop');
+
+    var rowsCountInput = document.getElementById('rowsCount');
+    var lenPerRowInput = document.getElementById('lenPerRow');
+    var kanaSizeInput = document.getElementById('kanaSize');
+    var applySettings = document.getElementById('applySettings');
+    var resetSettings = document.getElementById('resetSettings');
+
+    function clamp(n,min,max){ n=parseInt(n,10); if(isNaN(n)) return min; return Math.max(min, Math.min(max, n)); }
+
+    var rowsCount = clamp(rowsCountInput.value||1,1,10);
+    var lenPerRow = clamp(lenPerRowInput.value||7,1,20);
+    var kanaSize = clamp(kanaSizeInput.value||50,24,120);
+
+    // --- СОСТОЯНИЕ ---
+    var currentSeq = [];  // плоский массив пар [kana, romaji]
+    var breakpoints = []; // индексы концов строк в currentSeq
+    var currentIdx = 0;   // индекс текущего слога
+
+    function rnd(n){ return Math.floor(Math.random()*n); }
+    function applyKanaSize(px){ document.documentElement.style.setProperty('--kanaSize', px + 'px'); }
+
+    function newSet(){
+      currentSeq = []; breakpoints = [];
+      for(var r=0; r<rowsCount; r++){
+        var local = HIRA_BASE.slice();
+        var row = [];
+        while(row.length < lenPerRow && local.length>0){
+          var i = rnd(local.length);
+          row.push(local[i]);
+          local.splice(i,1); // уникальность в пределах строки
+        }
+        for(var k=0;k<row.length;k++){ currentSeq.push(row[k]); }
+        breakpoints.push(currentSeq.length-1);
+      }
+      currentIdx = 0;
+      renderRows();
+      setCurrentVisual();
+      answerEl.value='';
+      answerEl.focus();
+    }
+
+    function renderRows(){
+      rowsWrap.innerHTML = '';
+      var start = 0;
+      for(var b=0;b<breakpoints.length;b++){
+        var end = breakpoints[b];
+        var rowDiv = document.createElement('div');
+        rowDiv.className = 'row';
+        for(var i=start;i<=end;i++){
+          var span = document.createElement('span');
+          span.className = 'kana';
+          span.dataset.idx = i;
+          span.textContent = currentSeq[i][0];
+          rowDiv.appendChild(span);
+        }
+        rowsWrap.appendChild(rowDiv);
+        start = end+1;
+      }
+    }
+
+    function setCurrentVisual(){
+      var spans = document.querySelectorAll('.kana');
+      for(var i=0;i<spans.length;i++){ spans[i].classList.remove('current'); }
+      if(currentIdx < spans.length){ spans[currentIdx].classList.add('current'); }
+    }
+
+    // --- НОРМАЛИЗАЦИЯ ВВОДА ---
+    var RU2RO = {
+      'а':'a','и':'i','у':'u','э':'e','е':'e','о':'o',
+      'ка':'ka','ки':'ki','ку':'ku','ке':'ke','ко':'ko',
+      'са':'sa','си':'shi','ши':'shi','су':'su','се':'se','со':'so',
+      'та':'ta','ти':'chi','чи':'chi','цу':'tsu','те':'te','то':'to',
+      'на':'na','ни':'ni','ну':'nu','не':'ne','но':'no',
+      'ха':'ha','хи':'hi','фу':'fu','ху':'fu','хе':'he','хо':'ho',
+      'ма':'ma','ми':'mi','му':'mu','ме':'me','мо':'mo',
+      'я':'ya','ю':'yu','йо':'yo','ё':'yo',
+      'ра':'ra','ри':'ri','ру':'ru','ре':'re','ро':'ro',
+      'ва':'wa','во':'wo','н':'n'
+    };
+    var RO_ALIASES = { 'si':'shi','ti':'chi','tu':'tsu','hu':'fu','zi':'ji' };
+
+    function hasCyrillic(str){
+      for(var j=0;j<str.length;j++){ var code=str.charCodeAt(j); if(code>=1024 && code<=1327) return true; }
+      return false;
+    }
+    function normalizeToken(t){
+      var raw = (t||'').trim().toLowerCase();
+      if(!raw) return '';
+      if(hasCyrillic(raw)){ if(RU2RO.hasOwnProperty(raw)) return RU2RO[raw]; return raw; }
+      var out='';
+      for(var k=0;k<raw.length;k++){ var c=raw.charCodeAt(k); if((c>=97&&c<=122)||(c>=48&&c<=57)||c===45){ out+=raw[k]; } }
+      if(RO_ALIASES.hasOwnProperty(out)) out = RO_ALIASES[out];
+      return out;
+    }
+    function isVowelLat(ch){ return ch==='a'||ch==='e'||ch==='i'||ch==='o'||ch==='u'; }
+    function isVowelRu(ch){ return ch==='а'||ch==='е'||ch==='ё'||ch==='и'||ch==='о'||ch==='у'||ch==='ы'||ch==='э'||ch==='ю'||ch==='я'; }
+    function okMatch(expected, got){
+      return (got===expected) || (expected==='wo'&&(got==='o'||got==='wo')) || (expected==='n'&&(got==='n'||got==='m'));
+    }
+
+    function submitCurrent(){
+      if(currentIdx >= currentSeq.length) return;
+      var spans = document.querySelectorAll('.kana');
+      var tokenRaw = answerEl.value;
+      var got = normalizeToken(tokenRaw);
+      if(!got) return;
+      var expected = currentSeq[currentIdx][1];
+      var span = spans[currentIdx];
+      if(okMatch(expected, got)){
+        span.classList.remove('current');
+        span.classList.add('done');
+        answerEl.value='';
+        currentIdx++;
+        if(currentIdx >= currentSeq.length){ newSet(); return; }
+        setCurrentVisual();
+      } else {
+        span.classList.remove('blink'); void span.offsetWidth; span.classList.add('blink');
+        answerEl.select();
+      }
+    }
+
+    // Пробел/Enter — ручное подтверждение
+    answerEl.addEventListener('keydown', function(e){
+      var k = e.key||''; if(k===' '||k==='Spacebar'||k==='Enter'){ e.preventDefault(); submitCurrent(); }
+    });
+
+    // Автопроверка при вводе: первая гласная или длина >=2
+    answerEl.addEventListener('input', function(){
+      if(currentIdx >= currentSeq.length) return;
+      var v = (answerEl.value||'').toLowerCase(); if(!v) return;
+      var expected = currentSeq[currentIdx] ? currentSeq[currentIdx][1] : '';
+      var hasC = hasCyrillic(v);
+      var foundVowel = false;
+      if(hasC){ for(var i=0;i<v.length;i++){ if(isVowelRu(v[i])){ foundVowel = true; break; } } }
+      else { for(var j=0;j<v.length;j++){ if(isVowelLat(v[j])){ foundVowel = true; break; } } }
+      var norm = normalizeToken(v);
+      if(norm === expected){ submitCurrent(); return; }
+      if(foundVowel || norm.length >= expected.length){ submitCurrent(); }
+    });
+
+    // --- Настройки ---
+    function openPanel(){ panel.classList.add('open'); panel.setAttribute('aria-hidden','false'); backdrop.classList.add('show'); backdrop.setAttribute('aria-hidden','false'); }
+    function closePanel(){ panel.classList.remove('open'); panel.setAttribute('aria-hidden','true'); backdrop.classList.remove('show'); backdrop.setAttribute('aria-hidden','true'); }
+    openSettings.addEventListener('click', openPanel);
+    closeSettings.addEventListener('click', closePanel);
+    backdrop.addEventListener('click', closePanel);
+
+    // Живое применение настроек
+    function applyCounts(){ rowsCount = clamp(rowsCountInput.value||1,1,10); lenPerRow = clamp(lenPerRowInput.value||7,1,20); newSet(); }
+    rowsCountInput.addEventListener('input', applyCounts);
+    lenPerRowInput.addEventListener('input', applyCounts);
+    kanaSizeInput.addEventListener('input', function(){ kanaSize = clamp(kanaSizeInput.value||50,24,120); applyKanaSize(kanaSize); });
+
+    // Кнопки панели
+    applySettings.addEventListener('click', function(){ applyCounts(); applyKanaSize(kanaSize); closePanel(); });
+    resetSettings.addEventListener('click', function(){ rowsCountInput.value=1; lenPerRowInput.value=7; kanaSizeInput.value=50; applyCounts(); applyKanaSize(50); });
+
+    // Кнопка регенерации
+    regenBtn.addEventListener('click', newSet);
+
+    // Старт
+    applyKanaSize(kanaSize);
+    newSet();
+  </script>
+</body>
+</html>

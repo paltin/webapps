@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Практика катаканы — пошаговый ввод</title>
+  <style>
+    :root{ --bg:#0b0e14; --card:#111623; --muted:#9aa4b2; --ink:#e6e6e6; --accent:#7aa2ff; --ok:#2a2f3a; --bad:#4e1f1f; --bad2:#7a2a2a; --kanaSize:50px; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif; background: var(--bg); color: var(--ink); }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 24px; }
+    .card { position:relative; background: var(--card); border-radius: 16px; padding: 20px; box-shadow: 0 8px 28px rgba(0,0,0,0.35); }
+
+    .rows { display:flex; flex-direction:column; gap:10px; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+    .kana { font-size: var(--kanaSize); line-height:1; padding: 2px 4px; border-radius: 4px; background: #0f1424; transition: 0.2s; }
+    .kana.current { outline: none; box-shadow: 0 0 0 3px var(--accent), 0 0 12px rgba(122,162,255,.5); background: #0e1a33; }
+    .kana.done { background: var(--ok); outline: 2px solid transparent; opacity: .85; }
+
+    @keyframes blinkBad { 0%,100%{ background: var(--bad); } 50%{ background: var(--bad2); } }
+    .kana.blink { animation: blinkBad .25s ease-in-out 2; }
+
+    .controls { display:flex; justify-content:center; flex-wrap:wrap; margin-top: 14px; align-items:center; }
+    .hint { color: var(--accent); font-size: 20px; font-weight: 700; padding: 10px 16px; border-radius: 8px; background: rgba(122,162,255,0.15); min-width: 70px; text-align: center; }
+    input[type="text"] { width: 220px; padding:12px 14px; border-radius:12px; border:1px solid #243148; background:#0c1322; color:var(--ink); font-size:16px; }
+
+    /* Floating action buttons */
+    .fab { position:fixed; background:#1c2742; border:0; color:#fff; border-radius:999px; padding:14px 18px; cursor:pointer; font-weight:800; box-shadow:0 8px 24px rgba(0,0,0,.35); z-index:40; }
+    .settings-btn { left:16px; bottom:16px; }
+    .alphabet-btn { left:16px; bottom:80px; }
+    .regen-btn { right:16px; bottom:16px; }
+
+    .home-button {
+      position:fixed;
+      top:16px;
+      right:16px;
+      padding:10px 18px;
+      border-radius:999px;
+      background:#2563eb;
+      color:#f9fafb;
+      text-decoration:none;
+      font-weight:600;
+      letter-spacing:0.3px;
+      box-shadow:0 10px 20px rgba(0,0,0,0.35);
+      transition:background-color .2s ease, transform .2s ease;
+      z-index:60;
+    }
+
+    .home-button:hover {
+      background:#1d4ed8;
+      transform:translateY(-1px);
+    }
+
+    /* Settings panel as bottom sheet */
+    .backdrop { position:fixed; inset:0; background:rgba(0,0,0,.6); opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:49; }
+    .backdrop.show { opacity:1; pointer-events:auto; }
+    .panel { position:fixed; left:0; right:0; bottom:0; width:100%; max-height:80vh; background:rgba(13,19,34,0.95); color:var(--ink); box-shadow:0 -8px 28px rgba(0,0,0,.45); transform:translateY(100%); transition:transform .25s ease; z-index:50; display:flex; flex-direction:column; border-top-left-radius:16px; border-top-right-radius:16px; }
+    .panel.open { transform:translateY(0); }
+    
+    /* Alphabet panel as left sidebar */
+    #alphabetPanel { left:0; right:auto; bottom:0; width:400px; max-width:90vw; max-height:100vh; box-shadow:8px 0 28px rgba(0,0,0,.45); transform:translateX(-100%); border-top-left-radius:0; border-top-right-radius:16px; }
+    #alphabetPanel.open { transform:translateX(0); }
+    .panel header { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid #243148; }
+    .panel .content { padding:16px; display:flex; flex-direction:column; gap:14px; overflow:auto; }
+    .field { display:flex; align-items:center; justify-content:flex-start; gap:12px; }
+    .field input[type="number"], .field input[type="range"]{ width: 200px; }
+    .num { width:90px; padding:8px 10px; border-radius:10px; border:1px solid #243148; background:#0c1322; color:var(--ink); }
+    .switch { display:flex; align-items:center; gap:10px; }
+    .panel .actions { margin-top:auto; padding:16px; border-top:1px solid #243148; display:flex; gap:10px; }
+    .btn { padding:10px 14px; border-radius:10px; border:1px solid #243148; background:#1c2742; color:#fff; cursor:pointer; font-weight:700; }
+    .btn.ghost { background:transparent; }
+
+    /* Катакана сетка */
+    .katakana-grid { display:grid; grid-template-columns:repeat(5, 30px); gap:6px; margin-bottom:20px; }
+    .grid-item { 
+      width: 30px;
+      height: 30px;
+      border:1px solid #243148; 
+      border-radius:4px; 
+      background:#111623; 
+      color:var(--ink); 
+      cursor:pointer; 
+      transition:all .2s ease;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      font-size:10px;
+      font-weight:bold;
+      padding: 2px;
+    }
+    .grid-item.empty { display:none; }
+    .grid-item:hover { background:#1a2a3e; border-color:#7aa2ff; }
+    .grid-item.selected { background:var(--accent); color:#fff; }
+    .grid-item .kana { font-size:14px; margin-bottom:1px; }
+    .grid-item .romaji { font-size:7px; opacity:0.8; font-weight:normal; }
+  </style>
+</head>
+<body>
+  <a class="home-button" href="index.html">Back</a>
+  <div class="wrap">
+    <div class="card">
+      <div id="rows" class="rows" aria-live="polite"></div>
+      <div class="controls">
+        <input id="answer" type="text" placeholder="Введи чтение…" />
+      </div>
+      <div style="display:flex; justify-content:center; margin-top:12px;">
+        <span id="hint" class="hint" style="display:none;">подсказка</span>
+      </div>
+    </div>
+  </div>
+
+  <button id="openSettings" class="fab settings-btn" title="Настройки">⚙️</button>
+  <button id="openAlphabet" class="fab alphabet-btn" title="Алфавит катаканы">ア</button>
+  <button id="regenBtn" class="fab regen-btn" title="Сгенерировать заново">↻</button>
+
+  <!-- Settings bottom panel -->
+  <aside id="panel" class="panel" aria-hidden="true">
+    <header>
+      <strong>Настройки тренировки</strong>
+      <button id="closeSettings" class="btn ghost">✖</button>
+    </header>
+    <div class="content">
+      <div class="field">
+        <label for="rowsCount">Количество строк</label>
+        <input id="rowsCount" class="num" type="number" min="1" max="10" value="1">
+      </div>
+      <div class="field">
+        <label for="lenPerRow">Знаков в строке</label>
+        <input id="lenPerRow" class="num" type="number" min="1" max="20" value="7">
+      </div>
+      <div class="field">
+        <label for="kanaSize">Размер иероглифов</label>
+        <input id="kanaSize" type="range" min="24" max="120" value="50">
+      </div>
+    </div>
+    <div class="actions">
+      <button id="applySettings" class="btn">Применить</button>
+      <button id="resetSettings" class="btn ghost">Сброс</button>
+    </div>
+  </aside>
+
+  <!-- Alphabet panel -->
+  <aside id="alphabetPanel" class="panel" aria-hidden="true">
+    <header>
+      <strong>Выбор слогов для тренировки</strong>
+      <button id="closeAlphabet" class="btn ghost">✖</button>
+    </header>
+    <div class="content">
+      <div id="katakanaGrid" class="katakana-grid">
+        <!-- Сетка будет заполнена через JavaScript -->
+      </div>
+      <div class="switch">
+        <button id="selectAllBtn" class="btn ghost">Выбрать все</button>
+        <button id="deselectAllBtn" class="btn ghost">Снять все</button>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="applySelection" class="btn">Применить выбранные</button>
+    </div>
+  </aside>
+
+  <!-- Click-outside backdrop -->
+  <div id="backdrop" class="backdrop" aria-hidden="true"></div>
+
+  <script>
+    // --- БАЗОВЫЕ НАБОРЫ КАТАКАНЫ ---
+    var KATA_BASE = [
+      ['ア','a'],['イ','i'],['ウ','u'],['エ','e'],['オ','o'],
+      ['カ','ka'],['キ','ki'],['ク','ku'],['ケ','ke'],['コ','ko'],
+      ['サ','sa'],['シ','shi'],['ス','su'],['セ','se'],['ソ','so'],
+      ['タ','ta'],['チ','chi'],['ツ','tsu'],['テ','te'],['ト','to'],
+      ['ナ','na'],['ニ','ni'],['ヌ','nu'],['ネ','ne'],['ノ','no'],
+      ['ハ','ha'],['ヒ','hi'],['フ','fu'],['ヘ','he'],['ホ','ho'],
+      ['マ','ma'],['ミ','mi'],['ム','mu'],['メ','me'],['モ','mo'],
+      ['ヤ','ya'],['ユ','yu'],['ヨ','yo'],
+      ['ラ','ra'],['リ','ri'],['ル','ru'],['レ','re'],['ロ','ro'],
+      ['ワ','wa'],['ヲ','wo'],['ン','n']
+    ];
+
+    // --- ЭЛЕМЕНТЫ ---
+    var rowsWrap = document.getElementById('rows');
+    var answerEl = document.getElementById('answer');
+    var hintEl = document.getElementById('hint');
+    var regenBtn = document.getElementById('regenBtn');
+    var panel = document.getElementById('panel');
+    var openSettings = document.getElementById('openSettings');
+    var closeSettings = document.getElementById('closeSettings');
+    var alphabetPanel = document.getElementById('alphabetPanel');
+    var openAlphabet = document.getElementById('openAlphabet');
+    var closeAlphabet = document.getElementById('closeAlphabet');
+    var katakanaGrid = document.getElementById('katakanaGrid');
+    var selectAllBtn = document.getElementById('selectAllBtn');
+    var deselectAllBtn = document.getElementById('deselectAllBtn');
+    var applySelection = document.getElementById('applySelection');
+    var backdrop = document.getElementById('backdrop');
+
+    var rowsCountInput = document.getElementById('rowsCount');
+    var lenPerRowInput = document.getElementById('lenPerRow');
+    var kanaSizeInput = document.getElementById('kanaSize');
+    var applySettings = document.getElementById('applySettings');
+    var resetSettings = document.getElementById('resetSettings');
+
+    function clamp(n,min,max){ n=parseInt(n,10); if(isNaN(n)) return min; return Math.max(min, Math.min(max, n)); }
+
+    var rowsCount = clamp(rowsCountInput.value||1,1,10);
+    var lenPerRow = clamp(lenPerRowInput.value||7,1,20);
+    var kanaSize = clamp(kanaSizeInput.value||50,24,120);
+
+    // Текущий набор символов для генерации 
+    var currentValidKanas = KATA_BASE.slice();
+
+    // --- СОСТОЯНИЕ ---
+    var currentSeq = [];
+    var breakpoints = [];
+    var currentIdx = 0;
+    var selectedKanas = new Set();
+    var errorCount = 0; // счетчик ошибок для текущего символа
+
+    // Инициализация: выбираем все базовые символы по умолчанию
+    KATA_BASE.forEach(function(pair){ selectedKanas.add(pair[0]); });
+
+    function rnd(n){ return Math.floor(Math.random()*n); }
+    function applyKanaSize(px){ document.documentElement.style.setProperty('--kanaSize', px + 'px'); }
+
+    function newSet(){
+      currentSeq = []; breakpoints = [];
+      
+      var availableKana = currentValidKanas.filter(function(pair){
+        return selectedKanas.has(pair[0]);
+      });
+      
+      if(availableKana.length === 0){
+        availableKana = KATA_BASE.slice();
+      }
+      
+      for(var r=0; r<rowsCount; r++){
+        var row = [];
+        for(var k=0; k<lenPerRow; k++){
+          var i = rnd(availableKana.length);
+          row.push(availableKana[i]);
+        }
+        for(var j=0;j<row.length;j++){ currentSeq.push(row[j]); }
+        breakpoints.push(currentSeq.length-1);
+      }
+      currentIdx = 0;
+      errorCount = 0;
+      renderRows();
+      setCurrentVisual();
+      answerEl.value='';
+      answerEl.focus();
+    }
+
+    function renderRows(){
+      rowsWrap.innerHTML = '';
+      var start = 0;
+      for(var b=0;b<breakpoints.length;b++){
+        var end = breakpoints[b];
+        var rowDiv = document.createElement('div');
+        rowDiv.className = 'row';
+        for(var i=start;i<=end;i++){
+          var span = document.createElement('span');
+          span.className = 'kana';
+          span.dataset.idx = i;
+          span.textContent = currentSeq[i][0];
+          rowDiv.appendChild(span);
+        }
+        rowsWrap.appendChild(rowDiv);
+        start = end+1;
+      }
+    }
+
+    function setCurrentVisual(){
+      var spans = document.querySelectorAll('.kana');
+      for(var i=0;i<spans.length;i++){ spans[i].classList.remove('current'); }
+      if(currentIdx < spans.length){ spans[currentIdx].classList.add('current'); }
+      errorCount = 0;
+      hintEl.style.display = 'none';
+      hintEl.textContent = '';
+    }
+
+    function createGridItem(pair, index){
+      var item = document.createElement('div');
+      item.className = 'grid-item';
+      item.dataset.kana = pair[0];
+      
+      if(pair[0]){
+        item.innerHTML = '<div class="kana">' + pair[0] + '</div><div class="romaji">' + pair[1] + '</div>';
+        if(selectedKanas.has(pair[0])){
+          item.classList.add('selected');
+        }
+        item.addEventListener('click', function(){
+          toggleKanaSelection(pair[0]);
+        });
+      } else {
+        item.classList.add('empty');
+      }
+      return item;
+    }
+
+    function toggleKanaSelection(kana){
+      if(selectedKanas.has(kana)){
+        selectedKanas.delete(kana);
+      } else {
+        selectedKanas.add(kana);
+      }
+      
+      var item = document.querySelector('[data-kana="' + kana + '"]');
+      if(item){
+        item.classList.toggle('selected');
+      }
+    }
+
+    function renderKatakanaGrid(){
+      katakanaGrid.innerHTML = '';
+      
+      var allKanas = [
+        ['ア','a'], ['イ','i'], ['ウ','u'], ['エ','e'], ['オ','o'], '', '', '', '', '',
+        ['カ','ka'], ['キ','ki'], ['ク','ku'], ['ケ','ke'], ['コ','ko'], '', '', '', '', '',
+        ['ガ','ga'], ['ギ','gi'], ['グ','gu'], ['ゲ','ge'], ['ゴ','go'], '', '', '', '', '',
+        ['サ','sa'], ['シ','shi'], ['ス','su'], ['セ','se'], ['ソ','so'], '', '', '', '', '',
+        ['ザ','za'], ['ジ','ji'], ['ズ','zu'], ['ゼ','ze'], ['ゾ','zo'], '', '', '', '', '',
+        ['タ','ta'], ['チ','chi'], ['ツ','tsu'], ['テ','te'], ['ト','to'], '', '', '', '', '',
+        ['ダ','da'], ['ヂ','ji'], ['ヅ','zu'], ['デ','de'], ['ド','do'], '', '', '', '', '',
+        ['ナ','na'], ['ニ','ni'], ['ヌ','nu'], ['ネ','ne'], ['ノ','no'], '', '', '', '', '',
+        ['ハ','ha'], ['ヒ','hi'], ['フ','fu'], ['ヘ','he'], ['ホ','ho'], '', '', '', '', '',
+        ['バ','ba'], ['ビ','bi'], ['ブ','bu'], ['ベ','be'], ['ボ','bo'], '', '', '', '', '',
+        ['マ','ma'], ['ミ','mi'], ['ム','mu'], ['メ','me'], ['モ','mo'], '', '', '', '', '',
+        ['パ','pa'], ['ピ','pi'], ['プ','pu'], ['ペ','pe'], ['ポ','po'], '', '', '', '', '',
+        ['ヤ','ya'], ['ユ','yu'], ['ヨ','yo'], '', '', '', '', '', '', '',
+        ['ラ','ra'], ['リ','ri'], ['ル','ru'], ['レ','re'], ['ロ','ro'], '', '', '', '', '',
+        ['ワ','wa'], ['ヲ','wo'], ['ン','n'], '', '', '', '', '', '', '',
+        ['キャ','kya'], ['キュ','kyu'], ['キョ','kyo'], '', '', '', '', '', '', '',
+        ['シャ','sha'], ['シュ','shu'], ['ショ','sho'], '', '', '', '', '', '', '',
+        ['チャ','cha'], ['チュ','chu'], ['チョ','cho'], '', '', '', '', '', '', '',
+        ['ニャ','nya'], ['ニュ','nyu'], ['ニョ','nyo'], '', '', '', '', '', '', '',
+        ['ヒャ','hya'], ['ヒュ','hyu'], ['ヒョ','hyo'], '', '', '', '', '', '', ''
+      ];
+      
+      allKanas.forEach(function(pair, index){
+        var item = createGridItem(pair, index);
+        katakanaGrid.appendChild(item);
+      });
+      
+      currentValidKanas = allKanas.filter(function(pair){ return pair[0]; });
+    }
+
+    function selectAllKanas(){
+      currentValidKanas.forEach(function(pair){
+        selectedKanas.add(pair[0]);
+      });
+      renderKatakanaGrid();
+    }
+
+    function deselectAllKanas(){
+      selectedKanas.clear();
+      renderKatakanaGrid();
+    }
+
+    // --- НОРМАЛИЗАЦИЯ ВВОДА ---
+    var RU2RO = {
+      'а':'a','и':'i','у':'u','э':'e','е':'e','о':'o',
+      'ка':'ka','ки':'ki','ку':'ku','ке':'ke','ко':'ko',
+      'са':'sa','си':'shi','ши':'shi','су':'su','се':'se','со':'so',
+      'та':'ta','ти':'chi','чи':'chi','цу':'tsu','те':'te','то':'to',
+      'на':'na','ни':'ni','ну':'nu','не':'ne','но':'no',
+      'ха':'ha','хи':'hi','фу':'fu','ху':'fu','хе':'he','хо':'ho',
+      'ма':'ma','ми':'mi','му':'mu','ме':'me','мо':'mo',
+      'я':'ya','ю':'yu','йо':'yo','ё':'yo',
+      'ра':'ra','ри':'ri','ру':'ru','ре':'re','ро':'ro',
+      'ва':'wa','во':'wo','н':'n',
+      'га':'ga','ги':'gi','гу':'gu','ге':'ge','го':'go',
+      'за':'za','зи':'ji','зу':'zu','зе':'ze','зо':'zo',
+      'да':'da','ди':'ji','ду':'zu','де':'de','до':'do',
+      'ба':'ba','би':'bi','бу':'bu','бе':'be','бо':'bo',
+      'па':'pa','пи':'pi','пу':'pu','пе':'pe','по':'po',
+      'кя':'kya','кю':'kyu','кё':'kyo',
+      'ша':'sha','шу':'shu','шо':'sho','ся':'sha','сю':'shu','сё':'sho',
+      'тя':'cha','тю':'chu','тё':'cho','ча':'cha','чу':'chu','чо':'cho',
+      'ня':'nya','ню':'nyu','нё':'nyo',
+      'хя':'hya','хю':'hyu','хё':'hyo',
+      'мя':'mya','мю':'myu','мё':'myo',
+      'ря':'rya','рю':'ryu','рё':'ryo'
+    };
+    var RO_ALIASES = { 'si':'shi','ti':'chi','tu':'tsu','hu':'fu','zi':'ji' };
+
+    function hasCyrillic(str){
+      for(var j=0;j<str.length;j++){ var code=str.charCodeAt(j); if(code>=1024 && code<=1327) return true; }
+      return false;
+    }
+    function normalizeToken(t){
+      var raw = (t||'').trim().toLowerCase();
+      if(!raw) return '';
+      if(hasCyrillic(raw)){ if(RU2RO.hasOwnProperty(raw)) return RU2RO[raw]; return raw; }
+      var out='';
+      for(var k=0;k<raw.length;k++){ var c=raw.charCodeAt(k); if((c>=97&&c<=122)||(c>=48&&c<=57)||c===45){ out+=raw[k]; } }
+      if(RO_ALIASES.hasOwnProperty(out)) out = RO_ALIASES[out];
+      return out;
+    }
+    function isVowelLat(ch){ return ch==='a'||ch==='e'||ch==='i'||ch==='o'||ch==='u'; }
+    function isVowelRu(ch){ return ch==='а'||ch==='е'||ch==='ё'||ch==='и'||ch==='о'||ch==='у'||ch==='ы'||ch==='э'||ch==='ю'||ch==='я'; }
+    function okMatch(expected, got){
+      return (got===expected) || (expected==='wo'&&(got==='o'||got==='wo')) || (expected==='n'&&(got==='n'||got==='m'));
+    }
+
+    function submitCurrent(){
+      if(currentIdx >= currentSeq.length) return;
+      var spans = document.querySelectorAll('.kana');
+      var tokenRaw = answerEl.value;
+      var got = normalizeToken(tokenRaw);
+      if(!got) return;
+      var expected = currentSeq[currentIdx][1];
+      var span = spans[currentIdx];
+      
+      if(okMatch(expected, got)){
+        span.classList.remove('current');
+        span.classList.add('done');
+        answerEl.value='';
+        currentIdx++;
+        if(currentIdx >= currentSeq.length){ newSet(); return; }
+        setCurrentVisual();
+      } else {
+        errorCount++;
+        if(errorCount >= 3){
+          hintEl.textContent = expected;
+          hintEl.style.display = 'block';
+        }
+        span.classList.remove('blink'); 
+        void span.offsetWidth; 
+        span.classList.add('blink');
+        answerEl.select();
+      }
+    }
+
+    answerEl.addEventListener('keydown', function(e){
+      var k = e.key||''; 
+      if(k===' '||k==='Spacebar'||k==='Enter'){ 
+        e.preventDefault(); 
+        submitCurrent(); 
+      }
+    });
+
+    answerEl.addEventListener('input', function(){
+      if(currentIdx >= currentSeq.length) return;
+      var v = (answerEl.value||'').toLowerCase(); 
+      if(!v) return;
+      var expected = currentSeq[currentIdx] ? currentSeq[currentIdx][1] : '';
+      var hasC = hasCyrillic(v);
+      var foundVowel = false;
+      if(hasC){ 
+        for(var i=0;i<v.length;i++){ 
+          if(isVowelRu(v[i])){ 
+            foundVowel = true; 
+            break; 
+          } 
+        } 
+      } else { 
+        for(var j=0;j<v.length;j++){ 
+          if(isVowelLat(v[j])){ 
+            foundVowel = true; 
+            break; 
+          } 
+        } 
+      }
+      var norm = normalizeToken(v);
+      if(norm === expected){ submitCurrent(); return; }
+      if(foundVowel || norm.length >= expected.length){ submitCurrent(); }
+    });
+
+    function openPanel(){ panel.classList.add('open'); panel.setAttribute('aria-hidden','false'); backdrop.classList.add('show'); backdrop.setAttribute('aria-hidden','false'); }
+    function closePanel(){ panel.classList.remove('open'); panel.setAttribute('aria-hidden','true'); backdrop.classList.remove('show'); backdrop.setAttribute('aria-hidden','true'); }
+    openSettings.addEventListener('click', openPanel);
+    closeSettings.addEventListener('click', closePanel);
+
+    function openAlphabetPanel(){ alphabetPanel.classList.add('open'); alphabetPanel.setAttribute('aria-hidden','false'); backdrop.classList.add('show'); backdrop.setAttribute('aria-hidden','false'); }
+    function closeAlphabetPanel(){ alphabetPanel.classList.remove('open'); alphabetPanel.setAttribute('aria-hidden','true'); backdrop.classList.remove('show'); backdrop.setAttribute('aria-hidden','true'); }
+    openAlphabet.addEventListener('click', openAlphabetPanel);
+    closeAlphabet.addEventListener('click', closeAlphabetPanel);
+    
+    backdrop.addEventListener('click', function(){ 
+      closePanel(); 
+      closeAlphabetPanel(); 
+    });
+
+    function applyCounts(){ 
+      rowsCount = clamp(rowsCountInput.value||1,1,10); 
+      lenPerRow = clamp(lenPerRowInput.value||7,1,20); 
+      newSet(); 
+    }
+    rowsCountInput.addEventListener('input', applyCounts);
+    lenPerRowInput.addEventListener('input', applyCounts);
+    kanaSizeInput.addEventListener('input', function(){ 
+      kanaSize = clamp(kanaSizeInput.value||50,24,120); 
+      applyKanaSize(kanaSize); 
+    });
+
+    applySettings.addEventListener('click', function(){ 
+      applyCounts(); 
+      applyKanaSize(kanaSize); 
+      closePanel(); 
+    });
+    
+    resetSettings.addEventListener('click', function(){ 
+      rowsCountInput.value=1; 
+      lenPerRowInput.value=7; 
+      kanaSizeInput.value=50; 
+      applyCounts(); 
+      applyKanaSize(50); 
+    });
+
+    regenBtn.addEventListener('click', newSet);
+
+    selectAllBtn.addEventListener('click', selectAllKanas);
+    deselectAllBtn.addEventListener('click', deselectAllKanas);
+    applySelection.addEventListener('click', function(){
+      closeAlphabetPanel();
+      newSet();
+    });
+
+    applyKanaSize(kanaSize);
+    renderKatakanaGrid();
+    newSet();
+  </script>
+</body>
+</html>

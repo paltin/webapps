@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Practice Hub</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1f2937, #111827);
+            color: #f9fafb;
+        }
+
+        .container {
+            text-align: center;
+            padding: 40px;
+            background-color: rgba(15, 23, 42, 0.9);
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+        }
+
+        h1 {
+            margin-bottom: 24px;
+            font-size: 28px;
+            letter-spacing: 0.5px;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #f9fafb;
+            background-color: #2563eb;
+            border: none;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+        }
+
+        button:hover {
+            background-color: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.35);
+        }
+
+        button:active {
+            transform: translateY(1px);
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <h1>Choose Your Practice</h1>
+        <div class="button-group">
+            <button type="button" onclick="window.location.href='reader.html'">Reader</button>
+            <button type="button" onclick="window.location.href='hiragana.html'">Hiragana</button>
+            <button type="button" onclick="window.location.href='katakana.html'">Katakana</button>
+        </div>
+    </main>
+</body>
+</html>
